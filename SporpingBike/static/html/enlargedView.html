@@ -1,0 +1,11 @@
+<div class='modal-header'>
+	<label>{{title}}</label>
+	<p>by {{bike.userName}}</p>
+	<p>Found on:{{getDate()}}</p>
+</div>
+<div class='modal-body' style='text-align:center;'>
+	<img class="img-rounded centered img_sizing" ng-src="bike/{{bike.fileName}}">
+</div>
+<div class='modal-footer'>
+	<button class="btn btn-default" data-ng-click='close()'>Close</button>
+</div>

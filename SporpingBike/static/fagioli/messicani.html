@@ -1,0 +1,47 @@
+<!doctype html>
+<html data-ng-app='sporpingManagement'>
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Sporping Management</title>
+		<link rel="stylesheet" href="css/style.css?v=0.0.1" />
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- Latest compiled and minified JavaScript -->
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script type='text/javascript' src='js/angular.min.js'></script>
+		<script type='text/javascript' src='js/ui-bootstrap-tpls-0.14.3.min.js'></script>
+		<script type='text/javascript' src='js/appManagement.js?v=0.0.1'></script>
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body data-ng-controller='ManagementController'>
+	<div class="container-fluid">
+		<h1>Sporping Management</h1>
+		<div>
+			<div data-ng-hide="bikes.length">
+				<p>No bikes found.</p>
+			</div>
+			<div data-ng-show="bikes.length">
+				<p>{{bikes.length}} bike/s found.</p>
+			</div>
+			<uib-carousel  interval="0" no-wrap="noWrapSlides">
+				<uib-slide ng-repeat="slide in bikes">
+					<img  class='img-rounded centered' ng-src="bike/{{slide.fileName}}">
+					<div class="carousel-caption">
+						<p>{{slide.userName}}</p>
+						<div>
+							<button class="btn btn-primary" data-ng-click="enableBike($index)">Enable</button>
+							<button class="btn btn-warning" data-ng-click="deleteBike($index)">Delete</button>
+						</div>
+					</div>
+				</uib-slide>
+			</uib-carousel>
+		</div>
+	</div>
+	</body>
+</html>

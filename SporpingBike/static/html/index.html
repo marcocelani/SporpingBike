@@ -1,0 +1,68 @@
+<!doctype html>
+<html data-ng-app="sporpingApp">
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Sporping</title>
+		
+		<link rel="stylesheet" href="css/style.css?v=0.0.1" />
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+		<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js'></script>
+		<script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-mocks.js'></script>
+		<script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.min.js'></script>
+		<script type='text/javascript' src='js/ng-file-upload.min.js'></script>
+		<script type='text/javascript' src='js/ui-bootstrap-tpls-0.14.3.min.js'></script>
+		
+		<link rel="stylesheet" href="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+		<script type='text/javascript' src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+		
+		<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js'></script>
+		
+		<script type='text/javascript' src='js/exif.min.js'></script>
+		
+		<script type='text/javascript' src='js/app.js?v=0.0.2'></script>
+		<script type='text/javascript' src='js/Factories/Global.js?v=0.0.2'></script>
+		<script type='text/javascript' src='js/Controllers/NavController.js?v=0.0.2'></script>
+		<script type='text/javascript' src='js/Controllers/MainController.js?v=0.0.2'></script>
+		<script type='text/javascript' src='js/Controllers/AboutController.js?v=0.0.2'></script>
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+		<!-- <script src='https://www.google.com/recaptcha/api.js'></script> -->
+	</head>
+	<body>
+		<header>
+			<nav class="navbar navbar-default navbar-static-top rounded" data-ng-controller="NavController">
+				<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#/" data-ng-click="changeMenu('nav_home')">Sporping</a>
+				</div>
+
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li id="nav_home" class="active"><a href="#/" data-ng-click="changeMenu('nav_home')">Home<span class="sr-only">(current)</span></a></li>
+						<li id="nav_search"><a data-ng-disabled="true" data-ng-href="#" data-ng-click="changeMenu('nav_search')">Search Sporpings</a></li>
+						<li id="nav_add"><a data-ng-href="#/add">Add New Bike</a></li>
+						<li id="nav_about"><a data-ng-href="#/about">About Sporping</a></li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+		<div class="container-fluid" data-ng-view></div>
+		<footer class="footer">
+			<div class="container">
+			</div>
+		</footer>
+	</body>
+</html>

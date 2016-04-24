@@ -1,0 +1,23 @@
+<div class="main">
+	<h1>Last {{lastBikes.length}} Sporped</h1>
+	<div data-ng-hide="lastBikes.length">
+		<p>No bikes found.</p>
+	</div>
+	<uib-carousel  interval="0" no-wrap="noWrapSlides">
+		<uib-slide ng-repeat="slide in lastBikes">
+			<img class="img-rounded centered" ng-src="bike/{{slide.fileName}}" data-ng-click="showOnMap($index)">
+			<div class="carousel-caption">
+				<h5 ng-show="slide.title">{{slide.title}}</h5>
+				<h5>{{getDate($index)}}</h5>
+				<!-- button class="btn btn-default" ng-click="showOnMap($index)">Show On Map</button> -->
+			</div>
+		</uib-slide>
+	</uib-carousel>
+	<div>
+		<h1>Sporping Location</h1>
+		<div>
+			<a class="pointed" data-ng-click="geoLocateMe()">Geolocate me</a>
+		</div>
+		<div id="mapMain" class="rounded"></div>
+	</div>
+</div>

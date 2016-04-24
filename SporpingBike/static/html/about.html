@@ -1,0 +1,31 @@
+<div class="about">
+	<div class="jumbotron">
+			<div class"intro">
+				<p class="text_left bordered_b">What is Sporping?</p>
+				<p>Well... Sporping is when you find a bike like this:</p>
+				<img class='img-responsive img-rounded' 
+					 data-ng-src='{{aboutData.bike.fileName}}'
+					 alt='Common sporped bike'
+					 style="max-height:400px; margin:0 auto;"
+					data-ng-click="goToMap();"
+				/>
+				<p>
+				 To &quot;sporp&quot; is derived from italian verb &quot;spolpare&quot;. It means &quot;strip the flesh off&quot;.
+				 Yes, &quot;r&quot; is the roman way.
+				</p>
+				<p class="bordered">
+					There are {{aboutData.count}} bikes inside collection.
+				</p>
+				<p>For information please send an email here:<a href="mailto:sporpingbike@gmail.com">sporpingbike@gmail.com</a></p>
+			</div> 
+			<footer class="bordered_b">
+				<div class="footer_img">
+					<a href="//nodejs.org" target="_blank"><img alt='nodejs logo' src='images/233px-Node.js_logo.svg.png'></a>
+					<a href="//www.mongodb.org" target="_blank"><img alt='mongodb logo' src='images/powered-by-mongodb-logo-light.png'></a>
+					<a href="//angularjs.org" target="_blank"><img alt='angularjs logo' src='images/AngularJS-small.png'></a>
+					<a href="//angular-ui.github.io" target="_blank"><img src="images/UI_Shield.png" alt="angular ui"></a>
+					<a href="//www.raspberrypi.org" target="_blank"><img alt="RaspBerryPi" src="//www.raspberrypi.org/wp-content/uploads/2012/03/raspberry_pi_logo_rgb_552x650-212x250.png"></a>
+				</div>
+			</footer>
+	</div>
+</div>

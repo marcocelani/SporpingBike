@@ -1,0 +1,82 @@
+<div class='modal-header'>
+	<label>New Sporping</label>
+</div>
+<div class='modal-body'>
+	<div class="alert alert-info">
+		<ul>
+			<li>
+				Most smartphones nowadays can add the GPS coordinates on where the picture is taken directly as you use the phone camera. Thus, if you are using a recent smartphone you most probably don't need to do anything yourself about the geolocation of the "sporped" bike: it will automatically show up on the map. Alternatively, you may simply click on the "Geolocate Me" button, that will do the job for you. If that doesn't work either (how unfortunate!), please just find the location on the map yourself and click on it. Ta-dah!
+			</li>
+			<li>
+				For sake of efficency, the picture will be resized to 800x600 pixels, if needed.
+			</li>
+		</ul>
+	</div>
+	<form name='sporping_form'>
+		<div class='form-group'>
+			<div class="input-group">
+			<span class="input-group-addon">Select Bike</span>
+			<input id="inputUpload" class="btn btn-default" type="file" ngf-select data-ng-model="picFile" name="file"    
+             accept="image/*" required data-ng-change="elaborateFile(this)">
+			</div>
+		</div>
+		<div id="picture" class="centered"></div>
+		<div class="form-group">
+			<div class='input-group'>
+				<span class="input-group-addon">Title</span>
+				<input type='text' class='form-control' placeholder='Not required' data-ng-model='sporping.title'></input>
+			</div>
+		</div>
+		<div class='form-group'>
+			<div class="input-group">
+				<span class='input-group-addon'>Found Date</span>
+				<input type="date" class="form-control" uib-datepicker-popup ng-model="dt" is-open="status.opened" 
+					datepicker-optionsdatepicker-options="dateOptions" ng-required="true" close-text="Close" 
+					max-date="maxDate"
+					required />
+				<span class="input-group-btn">
+					<button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+				</span>
+			  </div>
+		</div>
+		<div class='form-group'>
+			<label>Geolocation</label>
+			 <div id="map" class="rounded"></div>
+		</div>
+		<div class='form-group'>
+			<input class='form-control' type="text" id="addr" placeholder="Enter search term" data-ng-model="query_string" />
+			<button class='btn btn-default' type="button" data-ng-click='addr_search()'>Search</button>
+			<button class='btn btn-default' type='button' data-ng-click='getGeolocation()'>Geolocate Me</button>
+		</div>
+		<div class='form-group'>
+			<!--<p ng-hide="searchItems.length">No locations found.</p>--!>
+			<p ng-show="searchItems.length">{{searchItems.length}} found/s.</p>
+			<div ng-repeat="x in searchItems">
+				<button type="button" class="btn btn-default" ng-click="selectLocation($index)">{{x.display_name}}</button>
+			</div>
+		</div>
+		<!-- <div class='form-group'>
+			<div class='input-group'>
+				<span class="input-group-addon">Email</span>
+				<input type='email' class='form-control' placeholder='Enter your email. It will never show.' data-ng-model='sporping.userEmail' required></input>
+			</div>
+			<div class="alert alert-warning">
+				<strong>Wait! Wait a moment!</strong> Why I need your email? Only for controlling
+			</div>
+		</div> -->
+		<div class='form-group'>
+			<div class="input-group">
+			<span class="input-group-addon">Nickname</span>
+			<input type='text' class='form-control' data-ng-model='sporping.userName' placeholder='Not required'></input>
+			</div>
+		</div>
+	</form>
+	<div class='modal-footer'>
+		<button data-ng-show='visibleAdd' class='btn btn-primary' data-ng-disabled='sporping_form.$invalid' data-ng-click='ok()'>Add!</button>
+		<p data-ng-hide='visibleAdd'>Loading...<img class="img_sizing" alt='runaway' src='images/runaway.gif'></img> </p>
+		<!-- <button class='btn btn-warning' data-ng-click='cancel()'>Cancel</button> -->
+	</div>
+	<div ng-hide="true">
+		<canvas id="scaler" width="0" height="0"></canvas>
+	</div>
+</div>

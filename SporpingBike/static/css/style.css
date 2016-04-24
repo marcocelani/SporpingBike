@@ -1,0 +1,89 @@
+@media (min-width: 800px) {
+  html {
+	width: 50%; 
+	margin: 0 auto;
+  }
+}
+
+.rounded {
+	border-radius: 6px;
+}
+
+nav {
+	box-shadow: 1px 1px 3px #CBCBCB;
+}
+
+h1, p {
+    text-shadow: -1px 1px px black;
+}
+
+.pointed {
+	cursor: pointer;
+}
+
+.centered {
+	margin: 0 auto;
+}
+
+#map { height: 300px; }
+#mapMain { height: 500px;}
+
+#markers {
+}
+#markers #imgLatex{
+	margin: 0 auto;
+	max-width: 100% !important;
+	max-height:100% !important;
+}
+
+.footer_img img, .img_sizing{ 
+	max-width:100%;
+	max-height:100%;
+};
+
+.main h1 {
+	font-size: 25px;
+}
+
+.aboutImg {
+	margin: auto;
+}
+
+div#results {
+  font-style: sans-serif;
+  color: black;
+  font-size: 75%;
+}
+
+.about {
+	text-align: center;
+}
+
+.text_left{
+	text-align: left;
+}
+
+p::first-letter, p::first-letter, h1::first-letter, label::first-letter{
+	font-weight: bold;
+	color: #B20000;
+}
+
+.bordered{
+	border: dotted 1px black;
+}
+
+.bordered_b {
+	border-bottom: dotted 1px black;
+}
+
+.footer_img img
+{
+	width: 150px;
+	padding: 5px;
+}
+
+footer {
+	margin-top: 5px;
+	border-radius: 5px;
+}
+

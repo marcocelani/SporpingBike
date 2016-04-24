@@ -1,0 +1,31 @@
+{
+  "author": "Marco Celani",
+  "name": "sporping",
+  "version": "0.0.1",
+  "description": "A Bike \"Sporping\" Collection.",
+  "main": "sporping",
+  "keywords": [
+    "sporping",
+    "bike"
+  ],
+  "dependencies": {
+    "async": "1.5.x",
+    "body-parser": "1.14.x",
+    "bootstrap": "3.3.x",
+    "compression": "1.6.x",
+    "exif-js": "2.1.x",
+    "express": "4.13.x",
+    "image-type": "2.1.x",
+    "mongodb": "2.0.x",
+    "multer": "1.1.x",
+    "ng-file-upload": "10.1.x",
+    "nodemailer": "1.10.x",
+    "passport": "0.3.x",
+    "passport-http": "0.3.x",
+    "read-chunk ": "1.0.1"
+  },
+  "private": true,
+  "engines": {
+    "node": "*"
+  }
+}
