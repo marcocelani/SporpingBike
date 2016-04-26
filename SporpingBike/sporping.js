@@ -156,31 +156,6 @@ app.get('/api/0.1/getAboutData', function (req, res) {
     });
 });
 
-/*app.get('/api/0.1/getAboutData',
-	function (req, res) {
-    var aboutData = {};
-    db_util.getBikesCount(function (err, count) {
-        if (err) {
-            Ko(res, 'application/json',
-                JSON.stringify({ status : 'ko!', message : 'getAboutData:' + err.message })
-            );
-        } else {
-            db_util.randomBike(function (err, bike) {
-                if (err) {
-                    Ko(res, 'application/json', 
-                       JSON.stringify({ status: 'ko!', message : 'getAboutData:' + err.message })
-                    );
-                } else {
-                    aboutData.bike = bike;
-                    aboutData.count = count;
-                    Ok(res, 'application/json', JSON.stringify(aboutData));
-                }
-            });
-        }
-    });
-}
-);*/
-
 app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }),
 	function (req, res) {
     db_util.getDisabledBike(function (err, result) {
@@ -224,51 +199,63 @@ app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false
 );
 
 app.post('/api/0.1/add', upload.single('file'), function (req, res) {
-    if (!utilities.checkDocument(req.body.sporping)) {
-        Ko(res, 'application/json',
-           JSON.stringify({ status : 'checkDocument: ko!', message : 'It\'s not valid object.' })
-        );
-        return;
-    }
-    var oId = new ObjectID();
-    io_util.processFile(req.file, oId, function (err, ext) {
-        if (err) {
-            Ko(res, 'application/json',
-               JSON.stringify({ status : 'processFile: ko!', message : err.message })
-            );
-        } else {
-            db_util.insertSporpingItem(req.body.sporping, oId, ext, function (err, result) {
-                //result is the sha256 of ObjectID.
-                if (err) {
-                    Ko(res, 'application/json',
-                       JSON.stringify({ status : 'insertSporpingItem:ko!', message : err.message })
-                    );
-                } else {
-                    // net_util.sendMail(req.body.sporping.userEmail, req.body.sporping.userName,
-                    // result, 
-                    // function(err){
-                    // if(err){
-                    // res.writeHead(500, {'Content-Type' : 'application/json'});
-                    // res.end(JSON.stringify({ status : 'ko!', message : 'Cannot send Mail.'}))
-                    // return;
-                    // } else {
-                    // res.writeHead(200, {'Content-Type' : 'application/json'});
-                    // res.end(JSON.stringify({ status: "ok" }));	
-                    // }
-                    // }
-                    // );
-                    net_util.sendNotification(req.body.sporping.userEmail, req.body.sporping.userName, 
-						function (err) {
-                        if (err)
-                            console.log(err);
-                    }
-                    );
-                    Ok(res, 'application/json', JSON.stringify({ status: "ok" }));
+    var notValidDoc = false;
+    async.waterfall(
+        [
+            function (next) {
+                if (!utilities.checkDocument(req.body.sporping)) {
+                    notValidDoc = true;
+                    next(new Error());
+                    return;
                 }
-            });
+                var oId = new ObjectID();
+                io_util.processFile(req.file, oId, function (err, ext) {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    next(null, oId, ext);
+                });
+            },
+            function (oId, ext, next) {
+                db_util.insertSporpingItem(req.body.sporping, oId, ext, function (err, result) {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    next(null); /* result is for net_util.sendEmail */
+                });
+            },
+            function (next) {
+                net_util.sendNotification(req.body.sporping.userEmail, req.body.sporping.userName, 
+						function (err) {
+                    if (err)
+                        console.log(err);
+                    next(null);
+                });
+            }
+        ], 
+        function (err) {
+            if (err) {
+                if (notValidDoc) {
+                    Ko(res, 'application/json',
+                        JSON.stringify(
+                        {
+                            status : 'checkDocument: ko!', 
+                            message : 'It\'s not valid object.'
+                        })
+                    );
+                }
+                else {
+                    Ko(res, 'application/json',
+                    JSON.stringify({ status : 'insertSporpingItem:ko!', message : err.message })
+                    );
+                }
+                return;
+            }
+            Ok(res, 'application/json', JSON.stringify({ status: "ok" }));
         }
-    });
-	
+    );	
 });
 
 // app.get('/activate', function(req, res){

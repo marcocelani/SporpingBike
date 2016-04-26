@@ -11,7 +11,9 @@ var config = {
     MIN_DISTANCE : 2000, //2km;
     HTTP_AUTH_USR : undefined,
     HTTP_AUTH_PWD : undefined,
-    HTTP_PORT  : 8080
-
+    HTTP_PORT  : 8080,
+    HOSTNAME : undefined,
+    GMAIL_USR : undefined,
+    GMAIL_PWD : undefined
 };
 exports.config = config;

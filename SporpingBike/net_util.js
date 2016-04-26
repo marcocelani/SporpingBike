@@ -1,15 +1,17 @@
 'use strict';
 
 var nodemailer = require('nodemailer');
+var configuration = require('./configuration.js');
 
-var HOSTNAME = 'sporpingbike.mooo.com';
-var FAGIOLI = HOSTNAME + '/fagioli/messicani.html';
+var config = configuration.config;
+
+var FAGIOLI = config.HOSTNAME + '/fagioli/messicani.html';
 
 var transporter = nodemailer.createTransport({
 	service: 'Gmail',
 	auth: {
-		user: process.env.GMAIL_USR, 
-		pass: process.env.GMAIL_PWD
+		user: config.GMAIL_USR, 
+		pass: config.GMAIL_PWD
 	}
 });
 
