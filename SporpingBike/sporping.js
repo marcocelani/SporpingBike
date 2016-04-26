@@ -9,6 +9,7 @@ var http = require('http'),
     ObjectID = require('mongodb').ObjectID,
     utilities = require('./utilities.js'),
     net_util = require('./net_util.js'),
+    configuration = require('./configuration.js'), /* Remember to set configuragion.jsv*/
     passport = require('passport'),
     BasicStrategy = require('passport-http').BasicStrategy,
     fs = require('fs'),
@@ -16,36 +17,34 @@ var http = require('http'),
     compress = require('compression'),
     async = require('async');
 
-var ROOT_DOCUMENT = './static';
-var BIKE_FOLDER = 'bike/';
-
+var config = configuration.config;
 var app = express();
-var upload = multer({ dest: BIKE_FOLDER })
+var upload = multer({ dest: config.BIKE_FOLDER })
 
 passport.use(new BasicStrategy(
     function (username, password, done) {
-        if (username.valueOf() === process.env.HTTP_AUTH_USR &&
-            password.valueOf() === process.env.HTTP_AUTH_PWD)
+        if (username.valueOf() === config.HTTP_AUTH_USR &&
+            password.valueOf() === config.HTTP_AUTH_PWD)
             return done(null, true);
         else
             return done(null, false);
     }
 ));
 
-app.use('/', express.static(ROOT_DOCUMENT + '/html', { lastModified : true }));
-app.use('/images', express.static(ROOT_DOCUMENT + '/images', { lastModified : true }));
-app.use('/js', express.static(ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/css', express.static(ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/bike', express.static(BIKE_FOLDER, { lastModified : true }));
-app.use('/fagioli/js', express.static(ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/fagioli/css', express.static(ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/fagioli/fonts', express.static(ROOT_DOCUMENT + '/fonts', { lastModified : true }));
-app.use('/fagioli/bike', express.static(BIKE_FOLDER, { lastModified : true }));
+app.use('/', express.static(config.ROOT_DOCUMENT + '/html', { lastModified : true }));
+app.use('/images', express.static(config.ROOT_DOCUMENT + '/images', { lastModified : true }));
+app.use('/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(compress());
 
-app.use('/fonts', express.static(ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
 
 var Ok = function (res, contentType, data) {
     if (res) {
@@ -66,7 +65,7 @@ var Ko = function (res , contentType, data) {
 };
 
 app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), function (req, res) {
-    fs.readFile(ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
+    fs.readFile(config.ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
         if (err) {
             //res.writeHead(500, { 'Content-Type': 'text/plain' });
             //res.end('Internal server error.');
@@ -81,18 +80,18 @@ app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : fa
 
 app.get('/api/0.1/getMaxBike', 
 	function (req, res) {
-        var center = url.parse(req.url, true).query;
-        db_util.getNearestBike(center, true, function (err, result) {
-            if (err) {
-                Ko(res, 
+    var center = url.parse(req.url, true).query;
+    db_util.getNearestBike(center, true, function (err, result) {
+        if (err) {
+            Ko(res, 
                     'application/json', 
                  JSON.stringify({ status : 'ko!', message : 'getNearestBike failed:' + err.message })
-                );
-            } else {
-                Ok(res, 'application/json', JSON.stringify(result))
-            }
-        });
-    }
+            );
+        } else {
+            Ok(res, 'application/json', JSON.stringify(result))
+        }
+    });
+}
 );
 
 app.get('/api/0.1/getNearestBike', 
@@ -125,41 +124,37 @@ app.get('/api/0.1/getBikes',
 }
 );
 
-app.get('api/0.1/getAboutData', function(req, res){
-    res.writeHead(200, { 'Content-Type' : contentType });
-    res.end({ status : 'ok' });      
+app.get('/api/0.1/getAboutData', function (req, res) {
+    async.waterfall([
+        function (callback) {
+            db_util.getBikesCount(function (err, count) {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null, count);
+                }
+            });
+        },
+        function (count, cb) {
+            db_util.randomBike(function (err, bike) {
+                if (err) {
+                    callback(err);
+                } else {
+                    cb(null, { bike : bike, count : count });
+                }
+            });
+        }
+    ],
+     function (err, bike) {
+        if (err) {
+            Ko(res, 'application/json',
+                JSON.stringify({ status: 'ko!', message : 'getAboutData:' + err.message })
+            );
+        } else {
+            Ok(res, 'application/json', JSON.stringify(bike));
+        }
+    });
 });
-// app.get('api/0.1/getAboutData', function(req, res){
-//     async.waterfall([
-//         function (callback) {
-//             db_util.getBikesCount(function(err, count){
-//                 if(err){
-//                     callback(err);
-//                 } else {
-//                     callback(null, count);
-//                 }
-//             });
-//         },
-//         function (count, cb){
-//             db_util.randomBike(function(err, bike){
-//                if(err){
-//                     callback(err);
-//                 } else {
-//                     callback(null, { bike : bike, count : count });       
-//                 }
-//             });
-//         }
-//     ],
-//     function(err, bike){
-//         if(err){
-//             Ko(res, 'application/json',
-//                JSON.stringify({status: 'ko!', message : 'getAboutData:' + err.message})
-//             );
-//         } else {
-//             Ok(res, 'application/json', JSON.stringify(bike));
-//         }
-//     });  
-// });
 
 /*app.get('/api/0.1/getAboutData',
 	function (req, res) {
@@ -323,6 +318,5 @@ var closeServer = function () {
 httpServer.on('connect', function(request, socket, head){
 	stats(request);
 });*/
-var server = app.listen(process.env.HTTP_PORT);
+var server = app.listen(config.HTTP_PORT);
 
-exports.BIKE_FOLDER = BIKE_FOLDER;

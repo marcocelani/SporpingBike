@@ -30,6 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="configuration.example.js" />
+    <Compile Include="configuration.js" />
     <Compile Include="db_util.js" />
     <Compile Include="io_util.js" />
     <Compile Include="net_util.js" />
