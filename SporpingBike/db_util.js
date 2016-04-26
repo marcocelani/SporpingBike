@@ -363,7 +363,7 @@ var getNearestBike = function (center, max, next) {
 var getBikesCount = function (next) {
     async.waterfall(
         [
-            function (next){
+            function (next) {
                 MongoClient.connect(db_connection_str, function (err, db) {
                     if (err) {
                         next(err);
@@ -372,7 +372,7 @@ var getBikesCount = function (next) {
                     next(null, db);
                 });
             },
-            function (db, next){
+            function (db, next) {
                 db.collection(sporping_item_col, function (err, sporping_item) {
                     if (err) {
                         next(err);
@@ -393,7 +393,7 @@ var getBikesCount = function (next) {
                     db.close();
                 });
             }
-        ], function (err, count) { 
+        ], function (err, count) {
             if (err) {
                 console.log(err.stack);
                 next(err);
@@ -404,41 +404,59 @@ var getBikesCount = function (next) {
 };
 
 var randomBike = function (cb) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            cb(new Error('cannot connect:' + err.message), null);
-        } else {
+    async.waterfall([
+        function (cb) {
+            MongoClient.connect(db_connection_str, function (err, db) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+                cb(null, db);
+            });
+        },
+        function (db, cb) {
+            /* getting collection */
             db.collection(sporping_item_col, function (err, sporping_item) {
                 if (err) {
-                    console.log(err.stack);
-                    cb(new Error('cannot get collection:' + err.message), null);
+                    cb(err);
                     db.close();
-                } else {
-                    sporping_item.find({ enabled : true, rejected : false })
-					.toArray(
-                        function (err, docs) {
-                            if (err) {
-                                console.log(err.stack);
-                                cb(new Error('cannot getting items:' + err.message), null);
-                                db.close();
-                            } else {
-                                if (docs.length > 0) {
-                                    var index = Math.floor(Math.random() * docs.length);
-                                    var data = {
-                                        fileName : 'bike/' + docs[index].fileName,
-                                        coordinates : docs[index].loc.coordinates
-                                    };
-                                    cb(null, data);
-                                }
-                                else
-                                    cb(null, 'not_found.jpg');
-                            }
-                        }
-                    );
+                    return;
                 }
+                cb(null, db, sporping_item);
+            });
+        },
+        function (db, sporping_item, cb) {
+            /* counting documents */
+            sporping_item.find({ enabled : true, rejected : false }).count(function (err, count) {
+                if (err) {
+                    cb(err);
+                    db.close();
+                    return;
+                }
+                cb(null, db, sporping_item, count);
+            });
+        },
+        /* getting document */
+        function (db, sporping_item, count, cb) {
+            var randomNumber = Math.floor(Math.random() * count);
+            sporping_item.find({ enabled : true, rejected : false })
+            .skip(randomNumber - 1)
+            .nextObject(function (err, item) {
+                if (err) {
+                    cb(err);
+                    db.close();
+                    return;
+                }
+                cb(null, { fileName : 'bike/' + item.fileName, coordinates : item.loc.coordinates });
             });
         }
+    ], function (err, data) {
+        if (err) {
+            console.log(err.stackTrace());
+            cb(err);
+            return;
+        }
+        cb(null, data);
     });
 };
 
