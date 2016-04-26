@@ -5,6 +5,7 @@ var utilities = require('./utilities.js');
 var ObjectID = require('mongodb').ObjectID;
 var io_util = require('./io_util.js');
 var configuration = require('./configuration.js');
+var async = require('async');
 
 var config = configuration.config;
 var db_connection_str = config.DB_CONNECTION_STR;
@@ -360,33 +361,46 @@ var getNearestBike = function (center, max, next) {
 
 /* This function returns the bikes count. */
 var getBikesCount = function (next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            db.collection(sporping_item_col, function (err, sporping_item) {
-                if (err) {
-                    console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
+    async.waterfall(
+        [
+            function (next){
+                MongoClient.connect(db_connection_str, function (err, db) {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    next(null, db);
+                });
+            },
+            function (db, next){
+                db.collection(sporping_item_col, function (err, sporping_item) {
+                    if (err) {
+                        next(err);
+                        db.close();
+                        return;
+                    }
+                    next(null, db, sporping_item);
+                });
+            },
+            function (db, sporping_item, next) {
+                sporping_item.find({ enabled : true, rejected : false })
+                .count(function (err, count) {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    next(null, count);
                     db.close();
-                } else {
-                    sporping_item.find({ enabled : true, rejected : false }).count(
-                        function (err, count) {
-                            if (err) {
-                                console.log(err.stack);
-                                next(new Error('cannot count collection:' + err.message));
-                                db.close();
-                            } else {
-                                next(null, count);
-                                db.close();
-                            }
-                        }
-                    );
-                }
-            });
-        }
-    });
+                });
+            }
+        ], function (err, count) { 
+            if (err) {
+                console.log(err.stack);
+                next(err);
+                return;
+            }
+            next(null, count);
+        });
 };
 
 var randomBike = function (cb) {
