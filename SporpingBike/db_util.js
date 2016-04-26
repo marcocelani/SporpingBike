@@ -447,7 +447,10 @@ var randomBike = function (cb) {
                     db.close();
                     return;
                 }
-                cb(null, { fileName : 'bike/' + item.fileName, coordinates : item.loc.coordinates });
+                if (item)
+                    cb(null, { fileName : 'bike/' + item.fileName, coordinates : item.loc.coordinates });
+                else
+                    cb(new Error('No document found.'));
             });
         }
     ], function (err, data) {
