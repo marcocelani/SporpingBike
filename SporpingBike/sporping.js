@@ -111,8 +111,7 @@ app.get('/api/0.1/getNearestBike',
 
 app.get('/api/0.1/getBikes',
 	function (req, res) {
-    var bikes = {};
-    db_util.getLastBikes(bikes, function (err) {
+    db_util.getLastBikes(function (err, bikes) {
         if (err) {
             Ko(res, 'application/json', 
                JSON.stringify({ status : 'ko!', message : 'getdBikes failed: ' + err.message })

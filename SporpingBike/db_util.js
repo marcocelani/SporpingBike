@@ -259,29 +259,51 @@ var disableBike = function (id, next) {
     });
 };
 
-var getLastBikes = function (bikes, next) {
-    if (!bikes)
-        bikes = {};
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            db.collection(sporping_item_last_col, function (err, sporping_last) {
-                sporping_last.find({}).sort({ foundDate: -1 }).toArray(function (err, documents) {
-                    if (err) {
-                        console.log(err.stack);
-                        next(new Error('cannot getting collection:' + err.message));
-                        db.close();
-                        return;
-                    } else {
-                        bikes.lastBikes = documents;
-                        next(null);
-                        db.close();
-                    }
-                });
+var getLastBikes = function (next) {
+    async.waterfall([
+        function (next){
+            MongoClient.connect(db_connection_str, function (err, db) {
+                if (err) {
+                    next(err);
+                    return;
+                }
+                next(null, db);
             });
+        },
+        function (db, next) {
+            db.collection(sporping_item_last_col, function (err, sporping_last) {
+                if (err) {
+                    next(err);
+                    db.close();
+                    return;
+                }
+                next(null, db, sporping_last);
+            });
+        },
+        function (db, sporping_last, next) {
+            sporping_last.find()
+            .sort({ foundDate : -1 })
+            .toArray(function (err, documents) {
+                if (err) {
+                    console.log(err.stack);
+                    next(new Error('cannot getting collection:' + err.message));
+                    db.close();
+                    return;
+                }
+                next(null, documents);
+                db.close();
+            });
+
         }
+    ], function (err, documents) {
+        if (err) {
+            console.log(err.trace);
+            next(err);
+            return;
+        }
+        var bikes = {};
+        bikes.lastBikes = documents;
+        next(null, bikes); 
     });
 };
 
@@ -455,7 +477,7 @@ var randomBike = function (cb) {
         }
     ], function (err, data) {
         if (err) {
-            console.log(err.stackTrace());
+            console.log(err.stack);
             cb(err);
             return;
         }
