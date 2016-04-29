@@ -51,7 +51,6 @@
     <Compile Include="static\js\jquery-2.1.4.min.js" />
     <Compile Include="static\js\ng-file-upload.min.js" />
     <Compile Include="static\js\ui-bootstrap-tpls-0.14.3.min.js" />
-    <Compile Include="test.js" />
     <Compile Include="utilities.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />

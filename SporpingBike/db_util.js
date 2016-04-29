@@ -12,44 +12,61 @@ var db_connection_str = config.DB_CONNECTION_STR;
 var sporping_item_col = config.sporping_item_col;
 var sporping_item_last_col = config.sporping_item_last_col;
 
-var insertSporpingItem = function (doc, objectId, ext, next) {
-    if (!utilities.checkDocument(doc)) {
-        next(new Error('Cannot insert an invalid document.'));
-        return;
-    }
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
+var insertSporpingItem = function (doc, objectId, ext, cb) {
+    async.waterfall([
+        function (next){
+            if (!utilities.checkDocument(doc)) {
+                next(new Error('Cannot insert an invalid document.'));
+                return;
+            }
+            MongoClient.connect(db_connection_str, function (err, db) {
+                if (err) {
+                    console.log(err.stack);
+                    next(err);
+                    return;
+                }
+                next(null, db);
+            });
+        },
+        function (db, next){
             db.collection(sporping_item_col, function (err, sporping_item) {
                 if (err) {
                     console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
+                    next(err);
                     db.close();
-                } else {
-                    doc._id = objectId;
-                    doc.fileName = doc._id + '.' + ext.ext;
-                    doc.creationDate = new Date();
-                    doc.emailConfirmed = true; /* not used but necessary set to true */
-                    //doc.emailHash = crypto.createHash('sha256').update('' + doc._id).digest('hex');
-                    doc.enabled = false;
-                    doc.rejected = false;
-                    doc.loc = { type : "Point", coordinates : [parseFloat(doc.loc.coordinates[0]), parseFloat(doc.loc.coordinates[1])] };
-                    if (!doc.userName)
-                        doc.userName = "Anonymous";
-                    sporping_item.insertOne(doc, { w : 1 }, function (err, r) {
-                        if (err) {
-                            console.log(err.stack);
-                            next(new Error('cannot insert:' + err.message));
-                        } else {
-                            next(null, undefined);//doc.emailHash);
-                            db.close();
-                        }
-                    });
+                    return;
                 }
+                next(null, db, sporping_item);
+            });
+        },
+        function (db, sporping_item, next) {
+            doc._id = objectId;
+            doc.fileName = doc._id + '.' + ext.ext;
+            doc.creationDate = new Date();
+            doc.emailConfirmed = true; /* not used but necessary set to true */
+            //doc.emailHash = crypto.createHash('sha256').update('' + doc._id).digest('hex');
+            doc.enabled = false;
+            doc.rejected = false;
+            doc.loc = { type : "Point", coordinates : [parseFloat(doc.loc.coordinates[0]), parseFloat(doc.loc.coordinates[1])] };
+            if (!doc.userName)
+                doc.userName = "Anonymous";
+            sporping_item.insertOne(doc, { w : 1 }, function (err, r) {
+                if (err) {
+                    console.log(err.stack);
+                    next(err);
+                    db.close();
+                    return;
+                } 
+                next(null, undefined);//doc.emailHash);
+                db.close();
             });
         }
+    ], function (err, result) {
+        if (err) {
+            cb(err);
+            return;
+        }
+        cb(null, undefined);
     });
 };
 
@@ -408,6 +425,7 @@ var getBikesCount = function (next) {
                 sporping_item.find({ enabled : true, rejected : false })
                 .count(function (err, count) {
                     if (err) {
+                        console.log(err.stack);
                         next(err);
                         return;
                     }
@@ -417,7 +435,6 @@ var getBikesCount = function (next) {
             }
         ], function (err, count) {
             if (err) {
-                console.log(err.stack);
                 next(err);
                 return;
             }
@@ -462,7 +479,7 @@ var randomBike = function (cb) {
         function (db, sporping_item, count, cb) {
             var randomNumber = Math.floor(Math.random() * count);
             sporping_item.find({ enabled : true, rejected : false })
-            .skip(randomNumber - 1)
+            .skip(randomNumber)
             .nextObject(function (err, item) {
                 if (err) {
                     cb(err);

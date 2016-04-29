@@ -2,7 +2,6 @@
 var extend = require('util')._extend;
 
 var checkDocument = function(doc){
-	console.log(doc);
 	if(!doc){
 		console.log('doc is undefined or null.');
 		return false;
@@ -57,7 +56,8 @@ var checkDocument = function(doc){
 		// doc.loc.coordinates[1] % 1 !== 0)){
 		// console.log('coordinates[0] is not a float.');
 		// return false;
-	// }
+    // }
+    console.log('doc is a valid document =)');
 	return true;
 };
 
