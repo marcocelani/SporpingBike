@@ -57,7 +57,7 @@ var insertSporpingItem = function (doc, objectId, ext, cb) {
                     db.close();
                     return;
                 } 
-                next(null, undefined);//doc.emailHash);
+                next(null, {});//doc.emailHash);
                 db.close();
             });
         }
@@ -490,6 +490,7 @@ var randomBike = function (cb) {
                     cb(null, { fileName : 'bike/' + item.fileName, coordinates : item.loc.coordinates });
                 else
                     cb(new Error('No document found.'));
+                db.close();
             });
         }
     ], function (err, data) {
