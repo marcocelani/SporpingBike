@@ -76,3 +76,4 @@ var checkDocument = function(doc){
 };
 
 exports.checkDocument = checkDocument;
+exports.checkSearchDoc = checkSearchDoc;

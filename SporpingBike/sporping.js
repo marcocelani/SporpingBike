@@ -40,11 +40,10 @@ app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModifi
 app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
 app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
 app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(compress());
-
-app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
 
 var Ok = function (res, contentType, data) {
     if (res) {
@@ -64,7 +63,7 @@ var Ko = function (res , contentType, data) {
         throw new Error("response is null or undefined.");
 };
 
-app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), function (req, res) {
+var fagioli = function (req, res) {
     fs.readFile(config.ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
         if (err) {
             //res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -76,10 +75,9 @@ app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : fa
             Ok(res, 'text/plain', data);
         }
     });
-});
+};
 
-app.get('/api/0.1/getMaxBike', 
-	function (req, res) {
+var getMaxBike01 = function (req, res) {
     var center = url.parse(req.url, true).query;
     db_util.getNearestBike(center, true, function (err, result) {
         if (err) {
@@ -91,11 +89,9 @@ app.get('/api/0.1/getMaxBike',
             Ok(res, 'application/json', JSON.stringify(result))
         }
     });
-}
-);
+};
 
-app.get('/api/0.1/getNearestBike', 
-	function (req, res) {
+var getNearestBike01 = function (req, res) {
     var center = url.parse(req.url, true).query;
     db_util.getNearestBike(center, false, function (err, result) {
         if (err) {
@@ -106,11 +102,9 @@ app.get('/api/0.1/getNearestBike',
             Ok(res, 'application/json', JSON.stringify(result));
         }
     });
-}
-);
+};
 
-app.get('/api/0.1/getBikes',
-	function (req, res) {
+var getBikes01 = function (req, res) {
     db_util.getLastBikes(function (err, bikes) {
         if (err) {
             Ko(res, 'application/json', 
@@ -120,10 +114,9 @@ app.get('/api/0.1/getBikes',
             Ok(res, 'application/json', JSON.stringify(bikes));
         }
     });
-}
-);
+};
 
-app.get('/api/0.1/getAboutData', function (req, res) {
+var getAboutData01 = function (req, res) {
     async.waterfall([
         function (callback) {
             db_util.getBikesCount(function (err, count) {
@@ -153,7 +146,13 @@ app.get('/api/0.1/getAboutData', function (req, res) {
             Ok(res, 'application/json', JSON.stringify(bike));
         }
     });
-});
+};
+
+app.get('/api/0.1/getMaxBike', getMaxBike01);
+app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
+app.get('/api/0.1/getNearestBike', getNearestBike01);
+app.get('/api/0.1/getBikes', getBikes01);
+app.get('/api/0.1/getAboutData', getAboutData01);
 
 app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }),
 	function (req, res) {
@@ -257,15 +256,19 @@ app.post('/api/0.1/add', upload.single('file'), function (req, res) {
     );	
 });
 
-app.post('/api/0.1/search', function(req, res){
-	if(!utilities.checkSearchDoc(req.body.search_item)){
+var search_api01 = function(req, res){
+	if(!utilities.checkSearchDoc(req.body)){
 		Ko(res, 'application/json', 
-			JSON.stringify({ status : 'Search API:ko!', message : err.message })
+			JSON.stringify({ status : 'Search API:ko!', message : 'Not a valid doc.' })
 		);
 		return;
 	}
-	
-});
+	Ok(res, 'application/json', JSON.stringify({ message : 'ok.'}));
+};
+
+app.post('/api/0.1/search', search_api01);
+
+
 // app.get('/activate', function(req, res){
 // db_util.activateRequest(req.query.id, function(err){
 // if(err){
