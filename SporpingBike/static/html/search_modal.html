@@ -2,6 +2,36 @@
 	<label>Sporping search</label>
 </div>
 <div class="modal-body">
+    <uib-accordion>
+        <uib-accordion-group heading="Search form" is-open="true">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" data-ng-model="search_item.Title"/>
+            </div>
+            <div class="form-group">
+                <label>Found date</label>
+                <input type="text" class="form-control" 
+                    uib-datepicker-popup='dd-MMMM-yyyy' ng-model="search_item.FoundDate" 
+                    is-open="isOpened"
+                    datepicker-options="dateOptions"
+                    close-text="Close" />
+                <span>
+                    <button type="button" class="btn btn-default" ng-click="openDatePopUp()"><i class="glyphicon glyphicon-calendar"></i></button>
+                </span>
+            </div>
+            <div class="form-group">
+                <label>Nickname</label>
+                <input type="text" class="form-control" data-ng-model="search_item.Nickname"/>
+            </div>
+        </uib-accordion-group>
+        <uib-accordion-group heading="Search">
+            <div data-ng-hide="sharedContent.searchedBikes.length > 0">
+                No item found.
+            </div>
+        </uib-accordion-group>
+    </uib-accordion>
 </div>
 <div class="modal-footer">
+    <button class="btn btn-primary" data-ng-click="search()">Search!</button>
+    <button class="btn btn-warning" data-ng-click="cancel()">Cancel</button>
 </div>

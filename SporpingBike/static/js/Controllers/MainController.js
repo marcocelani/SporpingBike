@@ -1,5 +1,7 @@
-(function(SporpingBike, undefined){
 'use strict';
+
+(function(SporpingBike, undefined){
+	
 var HOSTNAME = window.location.origin;
 
 SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$http', '$q', '$compile', 
@@ -126,16 +128,6 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 											.setContent("<div>You are here.</div>")
 											.openOn(map);
 			}, 3000);
-		};
-		
-		init();
-	}
-]);
-
-SporpingBike.sporpingApp.controller('SearchController', ['$scope', 
-	function($scope){
-		var init = function(){
-			
 		};
 		
 		init();
@@ -457,6 +449,8 @@ SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http',
 SporpingBike.sporpingApp.service('sharedContent', 
 	function(){
 		var  bike = null;
+		var schdBikes = [];
+		
 		var marker = L.icon({
 			iconUrl: 'images/cycling.png',
 			//shadowUrl: 'leaf-shadow.png',
@@ -469,7 +463,8 @@ SporpingBike.sporpingApp.service('sharedContent',
 		return {
 			getBike : function(){ return bike; },
 			setBike : function(b) { bike = b; },
-			markerIcon : function(){ return marker; } 
+			searchedBikes: function() { return schdBikes; },
+			markerIcon : function(){ return marker; }
 		}
 	}
 );

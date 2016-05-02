@@ -257,6 +257,15 @@ app.post('/api/0.1/add', upload.single('file'), function (req, res) {
     );	
 });
 
+app.post('/api/0.1/search', function(req, res){
+	if(!utilities.checkSearchDoc(req.body.search_item)){
+		Ko(res, 'application/json', 
+			JSON.stringify({ status : 'Search API:ko!', message : err.message })
+		);
+		return;
+	}
+	
+});
 // app.get('/activate', function(req, res){
 // db_util.activateRequest(req.query.id, function(err){
 // if(err){

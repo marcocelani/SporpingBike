@@ -22,7 +22,7 @@
     "nodemailer": "latest",
     "passport": "latest",
     "passport-http": "latest",
-    "read-chunk ": "latest"
+    "read-chunk": "latest"
   },
   "private": true,
   "engines": {
