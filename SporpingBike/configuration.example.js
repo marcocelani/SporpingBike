@@ -14,6 +14,7 @@ var config = {
     HTTP_PORT  : 8080,
     HOSTNAME : undefined,
     GMAIL_USR : undefined,
-    GMAIL_PWD : undefined
+    GMAIL_PWD : undefined,
+    PRODUCTION : true
 };
 exports.config = config;

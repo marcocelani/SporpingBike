@@ -339,7 +339,7 @@ var getNearestBike = function (center, max, next) {
                         next(new Error('cannot get collection:' + err.message));
                         db.close();
                     } else {
-                        var distance = (max) ? MAX_DISTANCE : MIN_DISTANCE;
+                        var distance = (max) ? config.MAX_DISTANCE : config.MIN_DISTANCE;
                         var result = [];
                         sporping_item.find(
                             {
@@ -503,6 +503,67 @@ var randomBike = function (cb) {
     });
 };
 
+var search = function(data, cb){
+    async.waterfall([
+        function(next){
+            if(!utilities.checkSearchDoc(data)){
+                var err = new Error('Not a valid document.');
+                console.log(err.stack);
+                next(err);
+                return;
+            }
+            MongoClient.connect(db_connection_str, function(err, db){
+                if(err){
+                    console.log(err.stack);
+                    next(err);
+                    return;
+                }
+                next(null, db);
+            });
+        },
+        function(db, next){
+            db.collection(sporping_item_col, function(err, sporping_item){
+                if(err){
+                    console.log(err.stack);
+                    db.close();
+                    return;
+                }
+                next(null, db, sporping_item);
+            });
+        },
+        function(db, sporping_item, next){
+            var query = {};
+            
+            if(data.Title)
+                query.title = data.Title;
+            if(data.FoundDate)
+                query.foundDate = { $lte : data.FoundDate };
+            if(data.Nickname)
+                query.userName = data.Nickname;
+                
+            query.enabled = true;
+            query.rejected = false;
+            
+            sporping_item.find(query)
+            .toArray(function(err, docs){
+                if(err){
+                    console.log(err.stack);
+                    db.close();
+                    next(err);
+                    return;
+                }
+                next(null, docs);
+                db.close();
+            });
+        }
+    ], function(err, result){
+        if(err)
+            cb(err);
+        else
+            cb(null, result);
+    });
+};
+
 exports.insertSporpingItem = insertSporpingItem;
 exports.getDisabledBike = getDisabledBike;
 //exports.activateRequest = activateRequest;
@@ -512,3 +573,4 @@ exports.getLastBikes = getLastBikes;
 exports.getNearestBike = getNearestBike;
 exports.getBikesCount = getBikesCount;
 exports.randomBike = randomBike;
+exports.search = search;

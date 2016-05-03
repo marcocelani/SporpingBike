@@ -31,20 +31,6 @@ passport.use(new BasicStrategy(
     }
 ));
 
-app.use('/', express.static(config.ROOT_DOCUMENT + '/html', { lastModified : true }));
-app.use('/images', express.static(config.ROOT_DOCUMENT + '/images', { lastModified : true }));
-app.use('/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
-app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
-app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
-app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
-app.use(bodyParser.json());
-app.use(passport.initialize());
-app.use(compress());
-
 var Ok = function (res, contentType, data) {
     if (res) {
         res.writeHead(200, { 'Content-Type' : contentType });
@@ -148,14 +134,7 @@ var getAboutData01 = function (req, res) {
     });
 };
 
-app.get('/api/0.1/getMaxBike', getMaxBike01);
-app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
-app.get('/api/0.1/getNearestBike', getNearestBike01);
-app.get('/api/0.1/getBikes', getBikes01);
-app.get('/api/0.1/getAboutData', getAboutData01);
-
-app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }),
-	function (req, res) {
+var getDisabled01 = function (req, res) {
     db_util.getDisabledBike(function (err, result) {
         if (err) {
             Ko(res, 'application/json', 
@@ -165,11 +144,9 @@ app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false
             Ok(res, 'application/json', JSON.stringify(result));
         }
     });
-}
-);
+};
 
-app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false }), 
-	function (req, res) {
+var enableBike01 = function (req, res) {
     db_util.enableBike(req.body.bike.id, function (err) {
         if (err) {
             Ko(res, 'application/json',
@@ -179,11 +156,9 @@ app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false
             Ok(res, 'application/json', JSON.stringify({ status : 'ok' }));
         }
     });
-}
-);
+};
 
-app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false }),
-	function (req, res) {
+var deleteBike01 = function (req, res) {
     db_util.disableBike(req.body.bike.id, function (err) {
         if (err) {
             Ko(res, 'application/json',
@@ -193,10 +168,9 @@ app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false
             Ok(res, 'application/json', JSON.stringify({ status : 'ok' }))
         }
     });
-}
-);
+};
 
-app.post('/api/0.1/add', upload.single('file'), function (req, res) {
+var add01 = function (req, res) {
     var notValidDoc = false;
     async.waterfall(
         [
@@ -254,20 +228,26 @@ app.post('/api/0.1/add', upload.single('file'), function (req, res) {
             Ok(res, 'application/json', JSON.stringify({ status: "ok" }));
         }
     );	
-});
+};
 
 var search_api01 = function(req, res){
 	if(!utilities.checkSearchDoc(req.body)){
 		Ko(res, 'application/json', 
-			JSON.stringify({ status : 'Search API:ko!', message : 'Not a valid doc.' })
+			JSON.stringify({ status : 'Ko!', message : 'Not a valid document.' })
 		);
 		return;
 	}
-	Ok(res, 'application/json', JSON.stringify({ message : 'ok.'}));
+    db_util.search(req.body, function(err, result){
+        if(err){
+            Ko(res,
+                'application/json',
+                JSON.stringify({ status: 'Ko!', message : err.message })
+            );
+            return;
+        }
+        Ok(res, 'application/json', JSON.stringify({ status : 'Ok!', data : result}));
+    });
 };
-
-app.post('/api/0.1/search', search_api01);
-
 
 // app.get('/activate', function(req, res){
 // db_util.activateRequest(req.query.id, function(err){
@@ -281,30 +261,35 @@ app.post('/api/0.1/search', search_api01);
 // });
 // });
 
-var stats = function (request) {
-    if (!request) {
-        console.log('uhmm...');
-        return;
-    }
-    console.log('[');
-    console.log('Request from:' + request.connection.remoteAddress);
-    console.log('Request url:' + request.url);
-    console.log(']');
-};
+/******* ROUTING *******/
+app.use(compress());
+app.use('/', express.static(config.ROOT_DOCUMENT + '/html', { lastModified : true }));
+app.use('/images', express.static(config.ROOT_DOCUMENT + '/images', { lastModified : true }));
+app.use('/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use(bodyParser.json());
+app.use(passport.initialize());
+app.get('/api/0.1/getMaxBike', getMaxBike01);
+app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
+app.get('/api/0.1/getNearestBike', getNearestBike01);
+app.get('/api/0.1/getBikes', getBikes01);
+app.get('/api/0.1/getAboutData', getAboutData01);
+app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }), getDisabled01);
+app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false }), enableBike01); 
+app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false }), deleteBike01);
+app.post('/api/0.1/add', upload.single('file'), add01);
+app.post('/api/0.1/search', search_api01);
+/***********************/
 
 process.on('uncaughtException', function (err) {
     console.log(err.stack);
     console.log('[ERR]:' + err.message);
-});
-
-process.on('SIGINT', function () {
-    //NOP.
-});
-
-process.on('SIGTERM', function () {
-    closeServer();
-    console.log('bye...');
-    process.exit();
 });
 
 var closeServer = function () {
@@ -312,9 +297,25 @@ var closeServer = function () {
         server.close();
 };
 
-/*var httpServer = http.createServer(app);
-httpServer.on('connect', function(request, socket, head){
-	stats(request);
-});*/
-var server = app.listen(config.HTTP_PORT);
+process.on('SIGTERM', function () {
+    closeServer();
+    console.log('bye...');
+    process.exit();
+});
 
+process.on('SIGINT', function () {
+    if(config &&
+        config.PRODUCTION === false){
+        process.kill(process.pid, 'SIGTERM');
+    }
+    //else NOP.
+});
+
+var server; 
+
+var init = function(){
+    server = app.listen(config.HTTP_PORT);
+    console.log('SporpingBike started (PID:' + process.pid + ').');
+};
+
+init();
