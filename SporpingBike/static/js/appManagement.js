@@ -2,35 +2,6 @@
 'use strict';
 var HOSTNAME = window.location.origin;
 SporpingBike.sporpingManagement = angular.module('sporpingManagement', ['ui.bootstrap']);
-
-SporpingBike.sporpingManagement.directive('styleParent', 
-		function(){ 
-			return {
-				restrict: 'A',
-				link: function(scope, elem, attr) {
-				elem.on('load', function() {
-					var w = $(this).width();
-					var	h = $(this).height();
-					var p = elem.parent();
-					
-					/*elem.css('max-width', '100% !important');
-					elem.css('max-height', '100% !important');*/
-					
-					$(this).addClass('img-responsive');
-
-					if(w > h){//landscape
-						$(this).css('width', '100%');
-					} else if(h >= w){//portrait
-						$(this).css('width', '70%');
-						
-					}
-					p.css('margin-left', 'auto');
-					p.css('margin-right', 'auto');
-				});
-				}
-			};
-		}
-	);
 	
 SporpingBike.sporpingManagement.controller('ManagementController', ['$scope', '$q', '$http',
 	function($scope, $q, $http){
@@ -49,6 +20,7 @@ SporpingBike.sporpingManagement.controller('ManagementController', ['$scope', '$
 			return $http.get(HOSTNAME+'/api/0.1/getDisabled')
 			.then(
 				function(result){
+					console.log(result.data);
 					$scope.bikes = result.data;
 				},
 				function(result){

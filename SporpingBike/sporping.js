@@ -52,14 +52,10 @@ var Ko = function (res , contentType, data) {
 var fagioli = function (req, res) {
     fs.readFile(config.ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
         if (err) {
-            //res.writeHead(500, { 'Content-Type': 'text/plain' });
-            //res.end('Internal server error.');
             Ko(res, 'text/plain', err.message);
-        } else {
-            //res.writeHead(200, { 'Content-Type' : 'text/html' });
-            //res.end(data);
-            Ok(res, 'text/plain', data);
+            return;
         }
+        Ok(res, 'text/html', data);
     });
 };
 
@@ -71,9 +67,9 @@ var getMaxBike01 = function (req, res) {
                     'application/json', 
                  JSON.stringify({ status : 'ko!', message : 'getNearestBike failed:' + err.message })
             );
-        } else {
-            Ok(res, 'application/json', JSON.stringify(result))
+            return;
         }
+        Ok(res, 'application/json', JSON.stringify(result))
     });
 };
 
@@ -84,9 +80,9 @@ var getNearestBike01 = function (req, res) {
             Ko(res, 'application/json',
                 JSON.stringify({ status : 'ko!', message : 'getNearestBike failed:' + err.message })
             );
-        } else {
-            Ok(res, 'application/json', JSON.stringify(result));
+            return;
         }
+        Ok(res, 'application/json', JSON.stringify(result));
     });
 };
 
@@ -96,9 +92,9 @@ var getBikes01 = function (req, res) {
             Ko(res, 'application/json', 
                JSON.stringify({ status : 'ko!', message : 'getdBikes failed: ' + err.message })
             );
-        } else {
-            Ok(res, 'application/json', JSON.stringify(bikes));
+            return;
         }
+        Ok(res, 'application/json', JSON.stringify(bikes));
     });
 };
 
@@ -199,11 +195,12 @@ var add01 = function (req, res) {
                 });
             },
             function (next) {
-                net_util.sendNotification(req.body.sporping.userEmail, req.body.sporping.userName, 
-						function (err) {
-                    if (err)
-                        console.log(err);
-                    next(null);
+                net_util.sendNotification(req.body.sporping.userEmail,
+                    req.body.sporping.userName, 
+				    function (err) {
+                        if (err)
+                            console.log(err);
+                        next(null);
                 });
             }
         ], 

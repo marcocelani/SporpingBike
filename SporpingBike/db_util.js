@@ -12,6 +12,15 @@ var db_connection_str = config.DB_CONNECTION_STR;
 var sporping_item_col = config.sporping_item_col;
 var sporping_item_last_col = config.sporping_item_last_col;
 
+var EXCLUDED_FIELDS = {
+    userEmail : 0,
+    creationDate : 0,
+    emailConfirmed : 0,
+    emailHash : 0,
+    enabled : 0,
+    rejected : 0,
+};
+
 var insertSporpingItem = function (doc, objectId, ext, cb) {
     async.waterfall([
         function (next){
@@ -198,39 +207,85 @@ var activateRequest = function (id, next) {
     });
 };
 
-var enableBike = function (id, next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            db.collection(sporping_item_col, function (err, sporping_item) {
-                if (err) {
+var enableBike = function(id, next){
+    async.waterfall([
+        function(next){
+            MongoClient.connect(db_connection_str, function(err, db){
+                if(err){
                     console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
-                    db.close();
-                } else {
-                    var o_id = new ObjectID(id);
-                    sporping_item.updateOne({ _id : o_id }, { $set: { enabled : true } }, function (err, r) {
-                        if (err) {
-                            console.log(err.stack);
-                            next(new Error('cannot update document:' + err.message));
-                            db.close();
-                        } else {
-                            if (r.result.n == 1) {
-                                insert_into_last(o_id, true);
-                                next(null);
-                            } else {
-                                next(new Error('is ID valid?'));
-                            }
-                            db.close();
-                        }
-                    });
+                    next(err);
+                    return;
                 }
+                next(null, db);
+            })
+        },
+        function(db, next){
+            db.collection(sporping_item_col, function(err, sporping_item){
+               if(err){
+                   console.log(err.stack);
+                   next(err);
+                   db.close();
+                   return;
+               }
+               next(null, db, sporping_item);
+            });
+        },
+        function(db, sporping_item, next){
+            var o_id = new ObjectID(id);
+            sporping_item.updateOne({ _id : o_id }, { $set: { enabled : true } }, function (err, r) {
+                 if (err) {
+                     console.log(err.stack);
+                     next(new Error('cannot update document:' + err.message));
+                     db.close();
+                     return;
+                 }
+                 if (r.result.n == 1) {
+                     insert_into_last(o_id, true);
+                     next(null);
+                 } else {
+                    next(new Error('is ID valid?'));
+                 }
+                 db.close();
             });
         }
-    });
+    ], function(err){
+        cb(err);
+    });    
 };
+
+// var enableBike = function (id, next) {
+//     MongoClient.connect(db_connection_str, function (err, db) {
+//         if (err) {
+//             console.log(err.stack);
+//             next(new Error('cannot connect:' + err.message));
+//         } else {
+//             db.collection(sporping_item_col, function (err, sporping_item) {
+//                 if (err) {
+//                     console.log(err.stack);
+//                     next(new Error('cannot get collection:' + err.message));
+//                     db.close();
+//                 } else {
+//                     var o_id = new ObjectID(id);
+//                     sporping_item.updateOne({ _id : o_id }, { $set: { enabled : true } }, function (err, r) {
+//                         if (err) {
+//                             console.log(err.stack);
+//                             next(new Error('cannot update document:' + err.message));
+//                             db.close();
+//                         } else {
+//                             if (r.result.n == 1) {
+//                                 insert_into_last(o_id, true);
+//                                 next(null);
+//                             } else {
+//                                 next(new Error('is ID valid?'));
+//                             }
+//                             db.close();
+//                         }
+//                     });
+//                 }
+//             });
+//         }
+//     });
+// };
 
 var disableBike = function (id, next) {
     MongoClient.connect(db_connection_str, function (err, db) {
@@ -324,78 +379,67 @@ var getLastBikes = function (next) {
     });
 };
 
-var getNearestBike = function (center, max, next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            if (center &&
-			   center.lat &&
-			   center.lng) {
-                db.collection(sporping_item_col, function (err, sporping_item) {
-                    if (err) {
-                        console.log(err.stack);
-                        next(new Error('cannot get collection:' + err.message));
-                        db.close();
-                    } else {
-                        var distance = (max) ? config.MAX_DISTANCE : config.MIN_DISTANCE;
-                        var result = [];
-                        sporping_item.find(
-                            {
-                                loc: {
-                                    $near: {
-                                        $geometry: {
-                                            type: 'Point', 
-                                            coordinates : [parseFloat(center.lat), parseFloat(center.lng)]
-                                        },
-                                        $maxDistance : distance
-                                    }
-                                },
-                                rejected: false
-                            }
-                        ).toArray(function (err, items) {
-                            if (err) {
-                                console.log(err.stack);
-                                next(new Error('cannot get array:' + err.message));
-                                db.close();
-                            } else {
-                                /* n steps  for Tick */
-                                var n = 10;
-                                var idx = 0;
-                                var dim = items.length;
-                                
-                                function partial_loop() {
-                                    for (var i = idx; i < (idx + n) && i < dim; ++i) {
-                                        var obj = {
-                                            id : items[i]._id,
-                                            userName : items[i].userName, 
-                                            loc : items[i].loc,
-                                            fileName : items[i].fileName,
-                                            foundDate : items[i].foundDate
-                                        };
-                                        if (items[i].title)
-                                            obj.title = items[i].title;
-                                        result.push(obj);
-                                    }
-                                    
-                                    if (i >= dim) {
-                                        next(null, result);
-                                        db.close();
-                                    } else {
-                                        idx += n;
-                                        /* the magic happens here :-) */
-                                        process.nextTick(partial_loop);
-                                    }
-                                }
-                                partial_loop();
-                            }
-                        });
-                    }
-                });
+var getNearestBike = function(center, max, cb){
+    async.waterfall([
+        function(next){
+            if (!center && !center.lat && !center.lng){
+                next(new Error('center parameter is wrong.'));
+                return;   
             }
+            MongoClient.connect(db_connection_str, function(err, db){
+                if(err){
+                    console.log(err.stack);
+                    next(err);
+                    return;
+                }
+                next(null, db);
+            });
+        },
+        function(db, next){
+            db.collection(sporping_item_col, function(err, sporping_item){
+                if(err){
+                    console.log(err.stack);
+                    next(err);
+                    return;
+                }
+                next(null, db, sporping_item);
+            });
+        },
+        function(db, sporping_item, next){
+            var distance = (max) ? config.MAX_DISTANCE : config.MIN_DISTANCE;
+            sporping_item.find(
+                {
+                    loc: {
+                        $near: {
+                            $geometry: {
+                                type: 'Point', 
+                                coordinates : [parseFloat(center.lat), parseFloat(center.lng)]
+                            },
+                            $maxDistance : distance
+                        }
+                    },
+                    rejected: false,
+                    enabled : true,
+                }, EXCLUDED_FIELDS)
+            .toArray(
+                function (err, items) {
+                    if (err) { 
+                        console.log(err.stack);
+                        next(new Error('cannot get array:' + err.message));
+                        db.close();
+                        return;
+                    }
+                    next(null, items);
+                    db.close();
+                });
         }
-    });
+    ], function(err, result){
+        if(err){
+            cb(err);
+            return;
+        }
+        cb(null, result);
+    });    
 };
 
 /* This function returns the bikes count. */
@@ -427,6 +471,7 @@ var getBikesCount = function (next) {
                     if (err) {
                         console.log(err.stack);
                         next(err);
+                        db.close();
                         return;
                     }
                     next(null, count);
@@ -544,7 +589,7 @@ var search = function(data, cb){
             query.enabled = true;
             query.rejected = false;
             
-            sporping_item.find(query)
+            sporping_item.find(query, EXCLUDED_FIELDS)
             .toArray(function(err, docs){
                 if(err){
                     console.log(err.stack);
