@@ -9,6 +9,8 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 	function($scope, $uibModal, $http, $q, $compile, sharedContent, Global){
 		$scope.lastBikes = [];
 		$scope.markers = [];
+		$scope.markers.mContent = [];
+		
 		var map = null;
 		var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 				osmAttribution = 'Map data &copy; 2012 <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -68,27 +70,41 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 			$http.get(rest_url, { params : { lat : lat, lng : lng } } )
 			.then(
 				function(result){
-					(function(){
-						angular.forEach(result.data, function(item){
-							if(!angular.isObject($scope.markers[item.id])){
+					//(function(){
+						angular.forEach(result.data, function(item, index){
+							if(!angular.isObject($scope.markers[item._id])){
 								var fd = Global.getDate(item.foundDate);
-								$scope.markers[item.id] = item;
+								$scope.markers[item._id] = item;
 								var m = null;
 								if(item.title)
-									m = L.marker([item.loc.coordinates[0], item.loc.coordinates[1]], {title : item.title, icon:sharedContent.markerIcon()});
+									m = L.marker([
+													item.loc.coordinates[0], 
+												  	item.loc.coordinates[1]
+												  ], 
+												  {
+													title : item.title,
+													icon:sharedContent.markerIcon()
+												  }
+												);
 								else 
-									m = L.marker([item.loc.coordinates[0], item.loc.coordinates[1]], {icon:sharedContent.markerIcon()});
+									m = L.marker([
+													item.loc.coordinates[0],
+													item.loc.coordinates[1]
+												],
+													{icon:sharedContent.markerIcon()});
 								m.bindPopup('', {closeOnClick: true, maxWidth : 250, maxHeight : 300 });
-								if(item.title)
-									m.setPopupContent($compile("<div id='markers'><p>"+item.userName+"</p><p>"+item.title+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item.id].id+"\")'>Enlarge View</a></p></div>")($scope)[0]);
-								else 
-									m.setPopupContent($compile("<div id='markers'><p>"+item.userName+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item.id].id+"\")'>Enlarge View</a></p></div>")($scope)[0]);
-								
 								m.addTo(map);
-								$scope.markers[item.id].m = m;
+								if(item.title)
+									$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>"+item.title+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge View</a></p></div>";
+								else 
+									$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge View</a></p></div>";
+								m.on('click', function(e){
+									e.target.setPopupContent($compile($scope.markers.mContent[e.target._leaflet_id])($scope)[0]);
+								});
+								$scope.markers[item._id].m = m;
 							}
 						});
-					}());
+					//}());
 				},
 				function(result){
 					console.log(result);
@@ -463,7 +479,8 @@ SporpingBike.sporpingApp.service('sharedContent',
 		return {
 			getBike : function(){ return bike; },
 			setBike : function(b) { bike = b; },
-			searchedBikes: function() { return schdBikes; },
+			getSearchedBikes: function() { return schdBikes; },
+			setSearchedBikes: function(items) { schdBikes = items; },
 			markerIcon : function(){ return marker; }
 		}
 	}

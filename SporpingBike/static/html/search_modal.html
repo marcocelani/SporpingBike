@@ -2,8 +2,9 @@
 	<label>Sporping search</label>
 </div>
 <div class="modal-body">
-    <uib-accordion>
-        <uib-accordion-group heading="Search form" is-open="true">
+    <uib-accordion close-others="false">
+        <uib-accordion-group heading="Search form" is-open="resultLength == 0">
+            <form name="search_form">
             <div class="form-group">
                 <label>Title</label>
                 <input type="text" class="form-control" data-ng-model="search_item.Title"/>
@@ -23,10 +24,14 @@
                 <label>Nickname</label>
                 <input type="text" class="form-control" data-ng-model="search_item.Nickname"/>
             </div>
+            </form>
         </uib-accordion-group>
-        <uib-accordion-group heading="Search">
-            <div data-ng-hide="sharedContent.searchedBikes.length > 0">
+        <uib-accordion-group heading="Search Result" is-open="tabOpened">
+            <div data-ng-hide="resultLength > 0">
                 No item found.
+            </div>
+            <div ng-repeat="item in searchedBikes">
+                <img data-ng-src="bike/{{item.fileName}}">
             </div>
         </uib-accordion-group>
     </uib-accordion>
