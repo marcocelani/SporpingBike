@@ -13,8 +13,8 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 		
 		var map = null;
 		var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				osmAttribution = 'Map data &copy; 2012 <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-				osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttribution});
+			osmAttribution = 'Map data &copy; 2012 <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+			osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttribution});
 				
 		var init = function(){
 			$q.all(
@@ -28,6 +28,7 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 		
 		var initMap = function(){
 			map = new L.Map('mapMain', {zoomControl: true});
+			//sharedContent.setMap(map); /* NOT USED */
 			map.setView(new L.LatLng(41.8933439, 12.4830718), 15).addLayer(osm);
 			map.on('dragend', function(e){ getNearestBike(false); });
 			if(window.location.hash){
@@ -41,7 +42,7 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 				setTimeout(
 					function(){
 						window.scrollTo(0,document.body.scrollHeight);
-						getNearestBike(true);
+						getNearestBike(true, lat, lng);
 					}, 1000);
 				
 			}
@@ -60,7 +61,7 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 			return Global.getDate($scope.lastBikes[index].foundDate);
 		};
 		
-		var getNearestBike = function(max){
+		var getNearestBike = function(max, latP, lngP){
 			// if(map.getZoom() != map.getMaxZoom()) return;
 			var latLng = map.getCenter();
 			var lat = latLng.lat;
@@ -94,15 +95,17 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 													{icon:sharedContent.markerIcon()});
 								m.bindPopup('', {closeOnClick: true, maxWidth : 250, maxHeight : 300 });
 								m.addTo(map);
-								if(item.title)
-									$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>"+item.title+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge View</a></p></div>";
-								else 
-									$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge View</a></p></div>";
-								m.on('click', function(e){
-									e.target.setPopupContent($compile($scope.markers.mContent[e.target._leaflet_id])($scope)[0]);
-								});
+								setContent(item, m, fd);
 								$scope.markers[item._id].m = m;
+								if(latP && lngP){
+									if(m._latlng.lat == latP && m._latlng.lng == lngP){
+										map.panTo(m.getLatLng(), {animate: true});
+										m.setPopupContent($compile($scope.markers.mContent[m._leaflet_id])($scope)[0]);
+										m.openPopup();
+									}
+								}
 							}
+							
 						});
 					//}());
 				},
@@ -110,6 +113,16 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 					console.log(result);
 				}
 			);
+		};
+		
+		var setContent = function(item, m, fd){
+			if(item.title)
+				$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>"+item.title+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge 			  View</a></p></div>";
+			else 
+				$scope.markers.mContent[m._leaflet_id] = "<div id='markers'><p>"+item.userName+"</p><p>Found on:"+fd+"</p><img id='imgLatex' src='bike/" + item.fileName +"'><p><a class='pointed' data-ng-click='enlargeMe(\""+$scope.markers[item._id]._id+"\")'>Enlarge View</a></p></div>";
+			m.on('click', function(e){
+				e.target.setPopupContent($compile($scope.markers.mContent[e.target._leaflet_id])($scope)[0]);
+			});	
 		};
 		
 		$scope.enlargeMe = function(id){
@@ -466,6 +479,7 @@ SporpingBike.sporpingApp.service('sharedContent',
 	function(){
 		var  bike = null;
 		var schdBikes = [];
+		var map = null;
 		
 		var marker = L.icon({
 			iconUrl: 'images/cycling.png',
@@ -481,7 +495,9 @@ SporpingBike.sporpingApp.service('sharedContent',
 			setBike : function(b) { bike = b; },
 			getSearchedBikes: function() { return schdBikes; },
 			setSearchedBikes: function(items) { schdBikes = items; },
-			markerIcon : function(){ return marker; }
+			markerIcon : function(){ return marker; },
+			getMap : function(){ return map; },
+			setMap : function(m){ map = m; }
 		}
 	}
 );

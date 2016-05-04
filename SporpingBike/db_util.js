@@ -580,11 +580,13 @@ var search = function(data, cb){
             var query = {};
             
             if(data.Title)
-                query.title = data.Title;
-            if(data.FoundDate)
-                query.foundDate = { $lte : data.FoundDate };
+                query.title = { $regex : new RegExp(data.Title, "i") };
+            if(data.StartDate)
+                query.StartDate = { $gte : data.StartDate };
+            if(data.EndDate)              
+                query.EndDate = {$lte : data.EndDate};
             if(data.Nickname)
-                query.userName = data.Nickname;
+                query.userName = { $regex : new RegExp(data.Nickname, "i") };
                 
             query.enabled = true;
             query.rejected = false;

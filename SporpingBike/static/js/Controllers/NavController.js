@@ -35,13 +35,25 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
                                     'Global', 'sharedContent', '$http',
    function($scope, $uibModalInstance, Global, sharedContent, $http){
         $scope.search_item = {};
-        $scope.isOpened = false;
+        $scope.isStartOpened = false;
+		$scope.isEndOpened = false;
         $scope.tabOpened = false;
 		$scope.resultLength = 0;
 		$scope.searchedBikes = [];
 		
-		$scope.openDatePopUp = function(){
-			$scope.isOpened = !$scope.isOpened;	
+		$scope.openStartDatePopUp = function(){
+			$scope.isStartOpened = !$scope.isStartOpened;	
+		};
+		
+		$scope.openEndDatePopUp = function(){
+			$scope.isEndOpened = !$scope.isEndOpened;
+		};
+		
+		$scope.getDate = function(date){
+			if(date)
+				return moment(date)
+					   .format('DD-MMMM-YYYY');
+			return '';
 		};
 		
         $scope.dateOptions = {
@@ -50,9 +62,16 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
             startingDay: 1
         };
         
+		$scope.showOnMap = function(index) {
+			window.location = '/#/?lat='+$scope.searchedBikes[index].loc.coordinates[0]+'&lng='+$scope.searchedBikes[index].loc.coordinates[1];
+			$uibModalInstance.dismiss();
+		};
+		
         var init = function(){
-            $scope.search_item.FoundDate = new Date();
+            $scope.search_item.StartDate = new Date();
+			$scope.search_item.EndDate = new Date();
             Global.changeMenu('nav_search');
+			$scope.searchedBikes = sharedContent.getSearchedBikes();
         };
         
         $scope.search = function(){

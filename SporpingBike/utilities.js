@@ -6,12 +6,6 @@ var checkSearchDoc = function(doc){
 		console.log('doc is undefined or null.');
 		return false;
 	}
-	if(doc.rejected){
-		if(doc.rejected === false){
-			console.log('cannot return a rejected item/s.');
-			return false;
-		}
-	}
 	return true;
 };
 

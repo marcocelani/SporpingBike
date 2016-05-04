@@ -5,7 +5,7 @@
 	</div>
 	<uib-carousel  interval="0" no-wrap="noWrapSlides">
 		<uib-slide ng-repeat="slide in lastBikes">
-			<img class="img-rounded centered" ng-src="bike/{{slide.fileName}}" data-ng-click="showOnMap($index)">
+			<img class="img-rounded centered" ng-src="bike/{{slide.fileName}}" data-ng-click="showOnMap($index)" style="cursor: pointer;">
 			<div class="carousel-caption">
 				<h5 ng-show="slide.title">{{slide.title}}</h5>
 				<h5>{{getDate($index)}}</h5>
