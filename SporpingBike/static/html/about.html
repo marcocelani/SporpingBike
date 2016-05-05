@@ -3,18 +3,21 @@
 			<div class"intro">
 				<p class="text_left bordered_b">What is Sporping?</p>
 				<p>Well... Sporping is when you find a bike like this:</p>
-				<img class='img-responsive img-rounded' 
-					 data-ng-src='{{aboutData.bike.fileName}}'
-					 alt='Common sporped bike'
-					 style="max-height:400px; margin:0 auto;"
-					data-ng-click="goToMap();"
-				/>
+				<div>
+					<img class='img-responsive img-rounded' 
+						 data-ng-src='{{aboutData.bike.fileName}}'
+						 alt='Common sporped bike'
+					 	style="max-height:400px; margin:0 auto; cursor:pointer;"
+						data-ng-click="goToMap();"
+					/>
+					<h6 class="small">&#40;click on me for geting location.&#41;</h6>
+				</div>
 				<p>
 				 To &quot;sporp&quot; is derived from italian verb &quot;spolpare&quot;. It means &quot;strip the flesh off&quot;.
 				 Yes, &quot;r&quot; is the roman way.
 				</p>
 				<p class="bordered">
-					There are {{aboutData.count}} bikes inside collection.
+					There are {{aboutData.count}} bikes in the collection.
 				</p>
 				<p>For information please send an email here:<a href="mailto:sporpingbike@gmail.com">sporpingbike@gmail.com</a></p>
 			</div> 

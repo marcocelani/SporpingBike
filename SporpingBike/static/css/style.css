@@ -13,7 +13,7 @@ nav {
 	box-shadow: 1px 1px 3px #CBCBCB;
 }
 
-h1, p {
+h1, p, h6 {
     text-shadow: -1px 1px px black;
 }
 
@@ -28,8 +28,6 @@ h1, p {
 #map { height: 300px; }
 #mapMain { height: 500px;}
 
-#markers {
-}
 #markers #imgLatex{
 	margin: 0 auto;
 	max-width: 100% !important;

@@ -581,10 +581,10 @@ var search = function(data, cb){
             
             if(data.Title)
                 query.title = { $regex : new RegExp(data.Title, "i") };
-            if(data.StartDate)
-                query.StartDate = { $gte : data.StartDate };
-            if(data.EndDate)              
-                query.EndDate = {$lte : data.EndDate};
+            // if(data.StartDate)
+            //     query.StartDate = { $gte : data.StartDate };
+            // if(data.EndDate)              
+            //     query.EndDate = {$lte : data.EndDate};
             if(data.Nickname)
                 query.userName = { $regex : new RegExp(data.Nickname, "i") };
                 

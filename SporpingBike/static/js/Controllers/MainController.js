@@ -20,7 +20,22 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 			$q.all(
 				[getBikes()]
 			).then(
-				function(){},
+				function(){
+					// var elm = angular.element('.sliderBike');
+					// angular.forEach($scope.lastBikes, function(item, index){
+					// 		// <img class="img-rounded centered" ng-src="bike/{{slide.fileName}}" data-ng-click="showOnMap($index)" style="cursor: pointer;">
+					// 		// <div class="carousel-caption">
+					// 		// <h5 ng-show="slide.title">{{slide.title}}</h5>
+					// 		// <h5>{{getDate($index)}}</h5>
+					// 		// </div>
+					// 		var html = '<img class="img-rounded centered" src="bike/' + item.fileName + '" data-ng-click="showOnMap('+index+')" />';
+					// 	elm.append($compile(html)($scope));
+					// });
+					// angular.element('.sliderBike').slick({
+					// 	dots : true,
+					// 	lazyLoad : 'progressive'
+					// });
+				},
 				function(){}
 			);
 			initMap();
@@ -31,28 +46,34 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 			//sharedContent.setMap(map); /* NOT USED */
 			map.setView(new L.LatLng(41.8933439, 12.4830718), 15).addLayer(osm);
 			map.on('dragend', function(e){ getNearestBike(false); });
-			if(window.location.hash){
-				if(window.location.hash.indexOf('?') == -1)
-					return;
-				var param = window.location.hash.substr(3, window.location.hash.length)
-												.split("&");
-				var lat = param[0].split("=")[1];
-				var lng = param[1].split("=")[1];
-				map.setView(new L.LatLng(parseFloat(lat), parseFloat(lng)), map.getMaxZoom());
-				setTimeout(
-					function(){
-						window.scrollTo(0,document.body.scrollHeight);
-						getNearestBike(true, lat, lng);
-					}, 1000);
-				
+			
+			if(sharedContent.getCoords()){
+				var coords = angular.copy(sharedContent.getCoords());
+				sharedContent.setCoords(null);
+				map.panTo(L.latLng(coords.lat, coords.lng), {animation : true});
+				getNearestBike(true, coords.lat, coords.lng);
 			}
+			// if(window.location.hash){
+			// 	if(window.location.hash.indexOf('?') == -1)
+			// 		return;
+			// 	var param = window.location.hash.substr(3, window.location.hash.length)
+			// 									.split("&");
+			// 	var lat = param[0].split("=")[1];
+			// 	var lng = param[1].split("=")[1];
+			// 	map.setView(new L.LatLng(parseFloat(lat), parseFloat(lng)), map.getMaxZoom());
+			// 	setTimeout(
+			// 		function(){
+			// 			window.scrollTo(0,document.body.scrollHeight);
+			// 			getNearestBike(true, lat, lng);
+			// 		}, 1000);
+				
+			// }
 		};
 		
 		$scope.showOnMap = function(index) {
-			map.setView(new L.LatLng($scope.lastBikes[index].loc.coordinates[0],
+			map.panTo(new L.LatLng($scope.lastBikes[index].loc.coordinates[0],
 								     $scope.lastBikes[index].loc.coordinates[1]
-									 ),
-						map.getMaxZoom());
+									 ), { animation : true });
 			window.scrollTo(0,document.body.scrollHeight);
 			setTimeout(function(){getNearestBike(true);}, 1000);
 		};
@@ -62,6 +83,7 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 		};
 		
 		var getNearestBike = function(max, latP, lngP){
+			var deferred = $q.defer();
 			// if(map.getZoom() != map.getMaxZoom()) return;
 			var latLng = map.getCenter();
 			var lat = latLng.lat;
@@ -102,17 +124,21 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 										map.panTo(m.getLatLng(), {animate: true});
 										m.setPopupContent($compile($scope.markers.mContent[m._leaflet_id])($scope)[0]);
 										m.openPopup();
+										window.scrollTo(0,document.body.scrollHeight);
 									}
 								}
 							}
 							
 						});
 					//}());
+					deferred.resolve();
 				},
 				function(result){
 					console.log(result);
+					deferred.reject();
 				}
 			);
+			return deferred.promise;
 		};
 		
 		var setContent = function(item, m, fd){
@@ -148,15 +174,19 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 		};
 		
 		$scope.geoLocateMe = function(){
+			map.on('locationfound ', function(e){
+				getNearestBike(true).then(
+				function(){
+					if($scope.herePopUp)
+						map.removeLayer($scope.herePopUp);
+					$scope.herePopUp = L.popup().setLatLng(map.getCenter())
+										.setContent("<div>You are here.</div>")
+										.openOn(map);
+				},
+				function(){}
+			);	
+			});
 			map.locate({maxZoom : map.getMaxZoom(), setView : true});
-			if($scope.herePopUp)
-				map.removeLayer($scope.herePopUp);
-			setTimeout(function(){getNearestBike(true);}, 1000);
-			setTimeout(function(){
-				$scope.herePopUp = L.popup().setLatLng(map.getCenter())
-											.setContent("<div>You are here.</div>")
-											.openOn(map);
-			}, 3000);
 		};
 		
 		init();
@@ -374,12 +404,12 @@ SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http',
 					}
 					canvas.width = width;
 					canvas.height = height;
-					console.log(width);
-					console.log(height);
+					//console.log(width);
+					//console.log(height);
 					ctx.drawImage(img, 0, 0, width, height);
 				
 					$scope.blob = dataURItoBlob(canvas.toDataURL("image/jpeg", 1));
-					console.log($scope.blob);
+					//console.log($scope.blob);
 					};
 					
 				};
@@ -478,6 +508,7 @@ SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http',
 SporpingBike.sporpingApp.service('sharedContent', 
 	function(){
 		var  bike = null;
+		var coords = null;
 		var schdBikes = [];
 		var map = null;
 		
@@ -493,6 +524,8 @@ SporpingBike.sporpingApp.service('sharedContent',
 		return {
 			getBike : function(){ return bike; },
 			setBike : function(b) { bike = b; },
+			getCoords: function(){ return coords; },
+			setCoords: function(c){ coords = c; },
 			getSearchedBikes: function() { return schdBikes; },
 			setSearchedBikes: function(items) { schdBikes = items; },
 			markerIcon : function(){ return marker; },

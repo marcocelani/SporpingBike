@@ -1,6 +1,7 @@
 (function(SporpingBike, undefined){
 SporpingBike.sporpingApp.controller('AboutController', ['$scope', '$http', '$q', 'Global', 
-	function($scope, $http, $q, Global){
+									'sharedContent',
+	function($scope, $http, $q, Global, sharedContent){
 		$scope.aboutData = null;
 
 		var init = function(){
@@ -10,7 +11,10 @@ SporpingBike.sporpingApp.controller('AboutController', ['$scope', '$http', '$q',
 		};
 		
 		$scope.goToMap = function(){
-			window.location = '/#/?lat='+$scope.aboutData.bike.coordinates[0]+'&lng='+$scope.aboutData.bike.coordinates[1];
+			sharedContent.setCoords({lat : $scope.aboutData.bike.coordinates[0], 
+									 lng : $scope.aboutData.bike.coordinates[1] 
+									});
+			window.location = '/#';
 		};
 		
 		var getAboutData = function(){

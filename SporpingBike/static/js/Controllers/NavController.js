@@ -40,6 +40,7 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
         $scope.tabOpened = false;
 		$scope.resultLength = 0;
 		$scope.searchedBikes = [];
+		$scope.oneAtATime = false;
 		
 		$scope.openStartDatePopUp = function(){
 			$scope.isStartOpened = !$scope.isStartOpened;	
@@ -63,7 +64,10 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
         };
         
 		$scope.showOnMap = function(index) {
-			window.location = '/#/?lat='+$scope.searchedBikes[index].loc.coordinates[0]+'&lng='+$scope.searchedBikes[index].loc.coordinates[1];
+			sharedContent.setCoords({lat : $scope.searchedBikes[index].loc.coordinates[0], 
+									 lng : $scope.searchedBikes[index].loc.coordinates[1] 
+									});
+			window.location = '/#';
 			$uibModalInstance.dismiss();
 		};
 		
