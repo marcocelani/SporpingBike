@@ -107,70 +107,154 @@ var getDisabledBike = function (next) {
     });
 };
 
-var insert_into_last = function (id, whereToSearch) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log('cannot connect:' + err.message);
-        } else {
-            db.collection(sporping_item_col, function (err, collection) {
+var insert_into_last = function(id, whereToSearch){
+    async.waterfall([
+        function(next){
+            MongoClient.connect(db_connection_str, function (err, db) {
+               if(err){
+                   next(err);
+                   return;
+               }
+               next(null, db); 
+            });
+        },
+        function(db, next){
+            db.collection(sporping_item_col, function(err, collection){
+               if(err){
+                   next(err);
+                   db.close();
+                   return;
+               }
+               next(null, db, collection);
+            });
+        },
+        function(db, collection, next){
+            var query = (whereToSearch) ? { _id : id, emailConfirmed : true } : 
+								  { emailHash : id, enabled : true }; //emailHash is not used.
+               collection.find(query)
+               .toArray(function(err, documents){
+                   if(err){
+                       next(err);
+                       db.close();
+                       return;
+                   }
+                   next(null, db, documents);
+               });
+        },
+        function(db, documents, next){
+            if (documents.length == 0) {
+                 console.log('document is empty');
+                 db.close();
+                 return;
+            }
+            if (documents.length > 1)
+                console.log('Warning! There are many documents, I chose first one.');
+            db.collection(sporping_item_last_col, function(err, sporping_last){
+                if(err){
+                    next(err);
+                    db.close();
+                    return;
+                }
+                next(null, db, documents, sporping_last);
+            })
+        },
+        function(db, documents, sporping_last, next){
+            var item = {
+                _id : new ObjectID(documents[0]._id),
+                foundDate : documents[0].foundDate,
+                fileName : documents[0].fileName,
+                userName : documents[0].userName,
+                loc : documents[0].loc
+            };
+            if (documents[0].title) {
+                item.title = documents[0].title;
+            }
+            sporping_last.insertOne(item, { w : 1 },
+            function (err, r) {
                 if (err) {
                     console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
+                    console.log('Error, cannot insert:' + err.message);
                     db.close();
-                } else {
-                    var query = (whereToSearch) ? { _id : id, emailConfirmed : true } : 
-								  { emailHash : id, enabled : true }; //emailHash is not used.
-                    collection.find(query)
-					.toArray(
-                        function (err, documents) {
-                            if (err) {
-                                console.log(err.stack);
-                                console.log('cannot insert document into sporping_last:' + err.message);
-                                db.close();
-                            } else {
-                                if (documents.length == 0) {
-                                    console.log('document is empty');
-                                    db.close();
-                                    return;
-                                }
-                                if (documents.length > 1)
-                                    console.log('Warning! There are many documents, I chose first one.');
-                                db.collection(sporping_item_last_col, function (err, sporping_last) {
-                                    if (err) {
-                                        console.log(err.stack);
-                                        console.log('Error, cannot get collection:' + err.message);
-                                        db.close();
-                                    } else {
-                                        var item = {
-                                            _id : new ObjectID(documents[0]._id),
-                                            foundDate : documents[0].foundDate,
-                                            fileName : documents[0].fileName,
-                                            userName : documents[0].userName,
-                                            loc : documents[0].loc
-                                        };
-                                        if (documents[0].title) {
-                                            item.title = documents[0].title;
-                                        }
-                                        sporping_last.insertOne(item, { w : 1 }, function (err, r) {
-                                            if (err) {
-                                                console.log(err.stack);
-                                                console.log('Error, cannot insert:' + err.message);
-                                                db.close();
-                                                return false;
-                                            }
-                                            db.close();
-                                            return true;
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    );
+                    next(err);
+                    return;
                 }
+                db.close();
+                next(null)
             });
         }
-    });
+    ], function(err){
+        if(err){
+            console.log(err.stack);
+            return false;
+        }
+        return true;
+    });    
 };
+
+// var insert_into_last = function (id, whereToSearch) {
+//     MongoClient.connect(db_connection_str, function (err, db) {
+//         if (err) {
+//             console.log('cannot connect:' + err.message);
+//         } else {
+//             db.collection(sporping_item_col, function (err, collection) {
+//                 if (err) {
+//                     console.log(err.stack);
+//                     next(new Error('cannot get collection:' + err.message));
+//                     db.close();
+//                 } else {
+//                     var query = (whereToSearch) ? { _id : id, emailConfirmed : true } : 
+// 								  { emailHash : id, enabled : true }; //emailHash is not used.
+//                     collection.find(query)
+// 					.toArray(
+//                         function (err, documents) {
+//                             if (err) {
+//                                 console.log(err.stack);
+//                                 console.log('cannot insert document into sporping_last:' + err.message);
+//                                 db.close();
+//                             } else {
+//                                 if (documents.length == 0) {
+//                                     console.log('document is empty');
+//                                     db.close();
+//                                     return;
+//                                 }
+//                                 if (documents.length > 1)
+//                                     console.log('Warning! There are many documents, I chose first one.');
+//                                 db.collection(sporping_item_last_col, function (err, sporping_last) {
+//                                     if (err) {
+//                                         console.log(err.stack);
+//                                         console.log('Error, cannot get collection:' + err.message);
+//                                         db.close();
+//                                     } else {
+//                                         var item = {
+//                                             _id : new ObjectID(documents[0]._id),
+//                                             foundDate : documents[0].foundDate,
+//                                             fileName : documents[0].fileName,
+//                                             userName : documents[0].userName,
+//                                             loc : documents[0].loc
+//                                         };
+//                                         if (documents[0].title) {
+//                                             item.title = documents[0].title;
+//                                         }
+//                                         sporping_last.insertOne(item, { w : 1 }, function (err, r) {
+//                                             if (err) {
+//                                                 console.log(err.stack);
+//                                                 console.log('Error, cannot insert:' + err.message);
+//                                                 db.close();
+//                                                 return false;
+//                                             }
+//                                             db.close();
+//                                             return true;
+//                                         });
+//                                     }
+//                                 });
+//                             }
+//                         }
+//                     );
+//                 }
+//             });
+//         }
+//     });
+// };
 
 /* NOT USED */
 var activateRequest = function (id, next) {
