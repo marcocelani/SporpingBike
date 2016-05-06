@@ -120,16 +120,11 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 								m.addTo(map);
 								setContent(item, m, fd);
 								$scope.markers[item._id].m = m;
-								if(latP && lngP){
-									if(m._latlng.lat == latP && m._latlng.lng == lngP){
-										map.panTo(m.getLatLng(), {animate: true});
-										m.setPopupContent($compile($scope.markers.mContent[m._leaflet_id])($scope)[0]);
-										m.openPopup();
-										window.scrollTo(0,document.body.scrollHeight);
-									}
-								}
+								checkPopUp(latP, lngP, m, item);
 							}
-							
+							else {
+								checkPopUp(latP, lngP, undefined, item);
+							}
 						});
 					//}());
 					deferred.resolve();
@@ -140,6 +135,18 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 				}
 			);
 			return deferred.promise;
+		};
+		
+		var checkPopUp = function(latP, lngP, m, item){
+			if(!m) m = $scope.markers[item._id].m;
+			if(latP && lngP){
+				if(m._latlng.lat == latP && m._latlng.lng == lngP){
+					map.panTo(m.getLatLng(), {animate: true});
+					m.setPopupContent($compile($scope.markers.mContent[m._leaflet_id])($scope)[0]);
+					m.openPopup();
+					window.scrollTo(0,document.body.scrollHeight);
+				}
+			}	
 		};
 		
 		var setContent = function(item, m, fd){
