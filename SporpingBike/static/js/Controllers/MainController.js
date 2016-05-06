@@ -75,7 +75,8 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 								     $scope.lastBikes[index].loc.coordinates[1]
 									 ), { animation : true });
 			window.scrollTo(0,document.body.scrollHeight);
-			setTimeout(function(){getNearestBike(true);}, 1000);
+			setTimeout(function(){getNearestBike(true, $scope.lastBikes[index].loc.coordinates[0],
+													   $scope.lastBikes[index].loc.coordinates[1]);}, 1000);
 		};
 		
 		$scope.getDate = function(index){
