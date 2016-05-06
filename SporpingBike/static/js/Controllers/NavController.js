@@ -34,7 +34,10 @@ SporpingBike.sporpingApp.controller('NavController', ['$scope', 'Global', '$uibM
 SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalInstance',
                                     'Global', 'sharedContent', '$http',
    function($scope, $uibModalInstance, Global, sharedContent, $http){
-        $scope.search_item = {};
+        $scope.search_item = {
+			Title : '',
+			Nickname : ''
+		};
         $scope.isStartOpened = false;
 		$scope.isEndOpened = false;
         $scope.tabOpened = false;
@@ -79,6 +82,14 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
         };
         
         $scope.search = function(){
+			if(
+				$scope.search_item.Title.trim() === '' &&
+				$scope.search_item.Nickname.trim() === ''
+			) {
+				alert('No search term.');
+				return;	
+			}
+			
             $http.post(HOSTNAME + '/api/0.1/search', JSON.stringify($scope.search_item))
 			.then(
 				function (result) {

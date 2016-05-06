@@ -173,7 +173,8 @@ var add01 = function (req, res) {
             function (next) {
                 if (!utilities.checkDocument(req.body.sporping)) {
                     notValidDoc = true;
-                    next(new Error());
+                    var error = new Error('notValidDoc');
+                    next(error);
                     return;
                 }
                 var oId = new ObjectID();
@@ -303,6 +304,7 @@ process.on('SIGTERM', function () {
 process.on('SIGINT', function () {
     if(config &&
         config.PRODUCTION === false){
+        console.log('-GOT SIGINT-');
         process.kill(process.pid, 'SIGTERM');
     }
     //else NOP.
