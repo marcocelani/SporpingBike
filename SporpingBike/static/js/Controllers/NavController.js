@@ -40,8 +40,7 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
 		};
         $scope.isStartOpened = false;
 		$scope.isEndOpened = false;
-        $scope.tabOpened = false;
-		$scope.resultLength = 0;
+		$scope.isOpened = true;
 		$scope.searchedBikes = [];
 		$scope.oneAtATime = false;
 		
@@ -79,6 +78,7 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
 			$scope.search_item.EndDate = new Date();
             Global.changeMenu('nav_search');
 			$scope.searchedBikes = sharedContent.getSearchedBikes();
+			$scope.isOpened = ($scope.searchedBikes.length > 0) ? false : true;
         };
         
         $scope.search = function(){
@@ -95,8 +95,7 @@ SporpingBike.sporpingApp.controller('SearchController', ['$scope', '$uibModalIns
 				function (result) {
 					sharedContent.setSearchedBikes(result.data.data);
 					$scope.searchedBikes = result.data.data;
-					$scope.resultLength = result.data.data.length;
-					$scope.tabOpened = true;
+					$scope.isOpened = (result.data.data.length > 0) ? false : true;
 				},
 				function (result) {
 					console.log(result);

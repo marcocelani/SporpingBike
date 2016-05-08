@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body">
     <uib-accordion close-others="oneAtATime">
-        <uib-accordion-group heading="Search form" is-open="resultLength == 0">
+        <uib-accordion-group heading="Search form" is-open="isOpened">
             <div class="form-group">
                 <label>Title</label>
                 <input type="text" class="form-control" data-ng-model="search_item.Title"/>
@@ -39,8 +39,8 @@
                 <button class="btn btn-warning" data-ng-click="cancel()">Cancel</button>
             </div>
         </uib-accordion-group>
-        <uib-accordion-group heading="Search Result" is-open="tabOpened">
-            <div data-ng-hide="resultLength > 0">
+        <uib-accordion-group heading="Search Result" is-open="true">
+            <div data-ng-show="searchedBikes.length == 0">
                 No item found.
             </div>
             <div style="max-height:50%;">
