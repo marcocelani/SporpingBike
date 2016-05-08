@@ -533,6 +533,12 @@ var randomBike = function (cb) {
     });
 };
 
+/*
+    input: an object with Title and/or
+           Nickname.
+    output: An array of object or empty
+            array. 
+*/
 var search = function(data, cb){
     async.waterfall([
         function(next){
@@ -572,7 +578,8 @@ var search = function(data, cb){
             
             if(data.Title &&
                typeof(data.Title) === 'string' &&
-               data.Title.trim() !== '' 
+               data.Title.trim() !== '' &&
+               data.Title.length > 2 
             ) query.title = { $regex : new RegExp(data.Title, "i") };
             // if(data.StartDate)
             //     query.StartDate = { $gte : data.StartDate };
@@ -580,13 +587,14 @@ var search = function(data, cb){
             //     query.EndDate = {$lte : data.EndDate};
             if(data.Nickname &&
                typeof(data.Nickname) === 'string' &&
-               data.Nickname.trim() !== ''
+               data.Nickname.trim() !== '' &&
+               data.Nickname.length > 2
               ) query.userName = { $regex : new RegExp(data.Nickname, "i") };
             
             if(Object.keys(query).length === 0 && 
                 JSON.stringify(query) === JSON.stringify({})){
                 db.close();
-                next(null, null);
+                next(null, []);
                 return;    
             };
             
