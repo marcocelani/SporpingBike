@@ -35,7 +35,7 @@
                 <input type="text" class="form-control" data-ng-model="search_item.Nickname"/>
             </div>
             <div class="form-group">
-                <button class="btn btn-primary" data-ng-click="search()">Search!</button>
+                <button class="btn btn-primary" data-ng-disabled="clicked" data-ng-click="search()">Search!</button>
                 <button class="btn btn-warning" data-ng-click="cancel()">Cancel</button>
             </div>
         </uib-accordion-group>
