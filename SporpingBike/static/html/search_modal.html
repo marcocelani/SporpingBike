@@ -41,7 +41,10 @@
         </uib-accordion-group>
         <uib-accordion-group heading="Search Result" is-open="true">
             <div data-ng-show="searchedBikes.length == 0">
-                No item found.
+                <p>No item found.</p>
+            </div>
+            <div data-ng-show="searchedBikes.length > 0">
+                <p>Item[s] found: {{searchedBikes.length}}</p>
             </div>
             <div style="max-height:50%;">
                 <div ng-repeat="item in searchedBikes" style="text-align:center;">
