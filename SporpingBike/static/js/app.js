@@ -1,7 +1,9 @@
 (function(SporpingBike, angular, undefined) {
 	'use strict';
 	
-	SporpingBike.sporpingApp = angular.module('sporpingApp', ['ui.bootstrap', 'ngRoute', 'ngFileUpload']);
+	SporpingBike.sporpingApp = angular.module('sporpingApp', ['ui.bootstrap', 'ngRoute', 'ngFileUpload',
+															  'ngTouch'
+															 ]);
 
 	SporpingBike.sporpingApp.config(['$routeProvider', function ($routeProvider) {
     $routeProvider
