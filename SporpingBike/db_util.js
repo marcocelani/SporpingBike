@@ -21,6 +21,44 @@ var EXCLUDED_FIELDS = {
     rejected : 0,
 };
 
+var get_collection = function(collection, callback){
+    async.waterfall([
+        function(next){
+            MongoClient.connect(db_connection_str, function(err, db){
+               if(err){
+                   console.log(err.stack);
+                   callback(err);
+                   return;
+               }
+               next(null, db);
+            });
+        },
+        function(db, next){
+            db.collection(collection, function(err, collection_obj){
+                if(err){
+                   console.log(err.stack);
+                   callback(err);
+                   db.close();
+                   return;
+               }
+               next(null, db, collection_obj);
+            })
+        }
+    ], function(err, db, collection_obj){
+        if(err){
+            callback(err);
+            return;
+        }
+        callback(null, db, collection_obj);
+    });
+};
+/*
+    input: 
+        doc: the javascript object representing the bike;
+        objectId: A mongodb objectId;
+        ext: image extension (e.g. jpg, png, etc.);
+    output: undefined.
+*/
 var insertSporpingItem = function (doc, objectId, ext, cb) {
     async.waterfall([
         function (next){
@@ -79,31 +117,55 @@ var insertSporpingItem = function (doc, objectId, ext, cb) {
     });
 };
 
-var getDisabledBike = function (next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
+/*
+    output: array of sporping_item 
+            in which 'enabled' and 
+            'rejected' properties
+            are set to false.
+            An empty array otherwise. 
+ */
+var getDisabledBike = function (cb){
+    async.waterfall([
+        function(next){
+            MongoClient.connect(db_connection_str, function(err, db){
+                if(err){
+                    console.log(err.stack);
+                    next(err);
+                    return;
+                }
+                next(null, db);
+            });
+        },
+        function(db, next){
             db.collection(sporping_item_col, function (err, sporping_item) {
+                if(err){
+                   console.log(err.stack);
+                   next(err);
+                   db.close();
+                   return; 
+                }
+                next(null, db, sporping_item);
+            });
+        },
+        function(db, sporping_item, next){
+            sporping_item.find({ enabled: false, rejected : false })
+            .toArray(function (err, docs) {
                 if (err) {
                     console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
+                    next(err);
                     db.close();
-                } else {
-                    sporping_item.find({ enabled: false, rejected : false }).toArray(function (err, docs) {
-                        if (err) {
-                            console.log(err.stack);
-                            next(new Error(err.message));
-                            db.close();
-                        } else {
-                            next(null, docs);
-                            db.close();
-                        }
-                    });
+                    return;
                 }
-            });
+                next(null, docs);
+                db.close();
+             });
         }
+    ], function(err, docs){
+        if(err){
+            cb(err);
+            return;
+        }
+        cb(null, docs);
     });
 };
 
@@ -272,47 +334,33 @@ var enableBike = function(id, next){
     });    
 };
 
-var disableBike = function (id, next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            db.collection(sporping_item_col, function (err, sporping_item) {
-                if (err) {
-                    console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
-                    db.close();
-                } else {
-                    var o_id = new ObjectID(id);
-                    /*sporping_item.find({_id : o_id}).toArray( function(err, documents){
-						if(err){
-							console.log(err.stack);
-							console.log('cannot unlink file:' + err.message);
-						} else {
-							/*io_util.removeBike(documents[0], function(err){
-								if(err) console.log(err);
-							});
-						}
-					});*/
-					sporping_item.updateOne({ _id : o_id }, { $set: { rejected : true } }, function (err, r) {
-                        if (err) {
-                            console.log(err.stack);
-                            next(new Error('cannot update document:' + err.message));
-                            db.close();
-                        } else {
-                            //result: { ok: 1, n: 0, upserted: [] },
-                            if (r.result.n == 1) {
-                                next(null);
-                            } else {
-                                next(new Error('Is ID valid?'));
-                            }
-                            db.close();
-                        }
-                    });
-                }
-            });
+/*
+    This function rejects a bike.
+    input: 
+        id: A mongodb objectId;
+    output: null.
+*/
+var disableBike = function(id, cb){
+    get_collection(sporping_item_col, function(err, db, sporping_item){
+        if(err){
+            cb(err);
+            return;
         }
+        var o_id = new ObjectID(id);
+        sporping_item.updateOne({ _id : o_id }, { $set: { rejected : true } }, function (err, r) {
+            if (err) {
+                console.log(err.stack);
+                next(new Error('cannot update document:' + err.message));
+                db.close();
+                return;
+            } //result: { ok: 1, n: 0, upserted: [] },
+            if (r.result.n == 1) {
+                cb(null);
+            } else {
+                cb(new Error('Is ID valid?'));
+            }
+            db.close();
+         });
     });
 };
 
