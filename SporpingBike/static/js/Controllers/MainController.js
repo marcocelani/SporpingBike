@@ -10,6 +10,8 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 		$scope.lastBikes = [];
 		$scope.markers = [];
 		$scope.markers.mContent = [];
+		$scope.query_string;
+		$scope.searchItems = [];
 		
 		var map = null;
 		var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -195,6 +197,29 @@ SporpingBike.sporpingApp.controller('MainController', ['$scope', '$uibModal', '$
 			);	
 			});
 			map.locate({maxZoom : map.getMaxZoom(), setView : true});
+			window.scrollTo(0,document.body.scrollHeight);
+		};
+		
+		$scope.addr_search = function(){
+			sharedContent.nominatimSearch($scope.query_string)
+			.then(
+				function(result){
+					$scope.searchItems = result;
+				},
+				function(result){
+					$scope.searchItems = result;
+				}
+			);
+		};
+		
+		$scope.selectLocation = function(index){
+			var locItem = $scope.searchItems[index];
+			map.panTo(new L.LatLng(locItem.lat, locItem.lon));//.addLayer(osm);
+			window.scrollTo(0,document.body.scrollHeight);
+		};
+		
+		$scope.getGeolocation = function(){
+			$scope.geoLocateMe();
 		};
 		
 		init();
@@ -222,7 +247,8 @@ SporpingBike.sporpingApp.controller('MainControllerEnlargedView', ['$scope', '$u
 ]);
 
 SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http', 'Upload', 'Global',
-	function($scope, $http, Upload, Global){
+															  'sharedContent',
+	function($scope, $http, Upload, Global, sharedContent){
 		$scope.sporping = {};
 		$scope.searchItems = [];
 		$scope.picFile = null;
@@ -347,18 +373,13 @@ SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http',
 		};
 		
 		$scope.addr_search = function()  {
-			var end_point = 'http://nominatim.openstreetmap.org/search';
-			$http({
-					url : end_point,
-					params : {format : 'json', limit : '5', q : $scope.query_string, json_callback : 'JSON_CALLBACK' },
-					method : 'JSONP',
-				}).then(
+			sharedContent.nominatimSearch($scope.query_string)
+			.then(
 				function(result){
-					$scope.searchItems = result.data;
+					$scope.searchItems = result;
 				},
 				function(result){
-					alert('error getting search.');
-					console.log(result);
+					$scope.searchItems = result;
 				}
 			);
 		};
@@ -513,13 +534,12 @@ SporpingBike.sporpingApp.controller('AddSporpingController', ['$scope', '$http',
 	}
 ]);
 
-SporpingBike.sporpingApp.service('sharedContent', 
-	function(){
+SporpingBike.sporpingApp.service('sharedContent', ['$http', '$q',
+	function($http, $q){
 		var  bike = null;
 		var coords = null;
 		var schdBikes = [];
 		var map = null;
-		
 		var marker = L.icon({
 			iconUrl: 'images/cycling.png',
 			//shadowUrl: 'leaf-shadow.png',
@@ -538,8 +558,29 @@ SporpingBike.sporpingApp.service('sharedContent',
 			setSearchedBikes: function(items) { schdBikes = items; },
 			markerIcon : function(){ return marker; },
 			getMap : function(){ return map; },
-			setMap : function(m){ map = m; }
+			setMap : function(m){ map = m; },
+			nominatimSearch : function(query_string){
+				var deferred = $q.defer();
+				
+				var end_point = 'http://nominatim.openstreetmap.org/search';
+				
+				$http({
+					url : end_point,
+					params : {format : 'json', limit : '5', q : query_string, json_callback : 'JSON_CALLBACK' },
+					method : 'JSONP',
+				}).then(
+				function(result){
+					return deferred.resolve(result.data);
+				},
+				function(result){
+					alert('error getting search.');
+					console.log(result);
+					return deferred.reject([]);
+				});
+				
+				return deferred.promise;
+			}
 		}
 	}
-);
+]);
 }(window.SporpingBike = window.SporpingBike || {}));

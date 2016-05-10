@@ -43,18 +43,7 @@
 			<label>Geolocation</label>
 			 <div id="map" class="rounded"></div>
 		</div>
-		<div class='form-group'>
-			<input class='form-control' type="text" id="addr" placeholder="Enter search term" data-ng-model="query_string" />
-			<button class='btn btn-default' type="button" data-ng-click='addr_search()'>Search</button>
-			<button class='btn btn-default' type='button' data-ng-click='getGeolocation()'>Geolocate Me</button>
-		</div>
-		<div class='form-group'>
-			<!--<p ng-hide="searchItems.length">No locations found.</p>--!>
-			<p ng-show="searchItems.length">{{searchItems.length}} found/s.</p>
-			<div ng-repeat="x in searchItems">
-				<button type="button" class="btn btn-default" ng-click="selectLocation($index)">{{x.display_name}}</button>
-			</div>
-		</div>
+		<geo-location-search></geo-location-search>
 		<!-- <div class='form-group'>
 			<div class='input-group'>
 				<span class="input-group-addon">Email</span>
