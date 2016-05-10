@@ -124,9 +124,9 @@ var getAboutData01 = function (req, res) {
             Ko(res, 'application/json',
                 JSON.stringify({ status: 'ko!', message : 'getAboutData:' + err.message })
             );
-        } else {
-            Ok(res, 'application/json', JSON.stringify(bike));
+            return;
         }
+        Ok(res, 'application/json', JSON.stringify(bike));
     });
 };
 
