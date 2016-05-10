@@ -210,10 +210,7 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
-/SporpingBike/sporping_start.sh
-/SporpingBike/sporping_start.bat
 jsconfig.json
 /SporpingBike/bike/*
 /SporpingBike/nohup.out
 /SporpingBike/configuration.js
-.vscode/settings.json
