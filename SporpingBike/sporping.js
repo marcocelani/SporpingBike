@@ -247,6 +247,24 @@ var search_api01 = function(req, res){
     });
 };
 
+var manage404 = function(req, res, next){
+    res.status(404);
+    if (req.accepts('html')) {
+        fs.readFile(config.ROOT_DOCUMENT + '/html/404.html', function(err, data){
+            if(err){
+                console.log(err.trace);
+                res.end('<html><head><title>404.</title></head><body>404 NOT FOUND</body></html>');
+                return;
+            }
+            res.end(data);
+        });
+    } else if(req.accepts('json')){
+        res.end({ error: 'Not found' });
+    }
+    else {
+        res.type('txt').end('404 not found');
+    }
+}
 // app.get('/activate', function(req, res){
 // db_util.activateRequest(req.query.id, function(err){
 // if(err){
@@ -283,6 +301,8 @@ app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false
 app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false }), deleteBike01);
 app.post('/api/0.1/add', upload.single('file'), add01);
 app.post('/api/0.1/search', search_api01);
+/* 404 */
+app.use(manage404);
 /***********************/
 
 process.on('uncaughtException', function (err) {
