@@ -259,7 +259,7 @@ var manage404 = function(req, res, next){
             res.end(data);
         });
     } else if(req.accepts('json')){
-        res.end({ error: 'Not found' });
+        res.end(JSON.stringify({ error: 'Not found' }));
     }
     else {
         res.type('txt').end('404 not found');
