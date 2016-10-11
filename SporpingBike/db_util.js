@@ -453,7 +453,7 @@ var randomBike = function (cb) {
                         return;
                     }
                     if (item){ 
-                        next(null, { fileName : 'bike/' + item.fileName, coordinates : item.loc.coordinates });
+                        next(null, { fileName : config.BIKE_FOLDER + item.fileName, coordinates : item.loc.coordinates });
                     }
                     else
                         next(new Error('No document found.'));
