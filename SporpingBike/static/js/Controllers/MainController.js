@@ -549,6 +549,7 @@ SporpingBike.sporpingApp.service('sharedContent', ['$http', '$q',
 			//shadowAnchor: [4, 62],  // the same for the shadow
 			//popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 		});
+		var SEARCH_PER_PAGE_ITEMS = 5;
 		return {
 			getBike : function(){ return bike; },
 			setBike : function(b) { bike = b; },
@@ -559,6 +560,7 @@ SporpingBike.sporpingApp.service('sharedContent', ['$http', '$q',
 			markerIcon : function(){ return marker; },
 			getMap : function(){ return map; },
 			setMap : function(m){ map = m; },
+			getSearchPerPageItems : function() { return SEARCH_PER_PAGE_ITEMS; },
 			nominatimSearch : function(query_string){
 				var deferred = $q.defer();
 				

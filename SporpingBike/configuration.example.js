@@ -15,6 +15,7 @@ var config = {
     HOSTNAME : undefined,
     GMAIL_USR : undefined,
     GMAIL_PWD : undefined,
-    PRODUCTION : true
+    PRODUCTION : true,
+    PER_PAGE : 5, /* PER PAGE ITEMS */
 };
 exports.config = config;
