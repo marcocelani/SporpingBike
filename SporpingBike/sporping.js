@@ -34,7 +34,7 @@ passport.use(new BasicStrategy(
 var Ok = function (res, contentType, data) {
     if (res) {
         /* CORS stuff */
-        res.header('Access-Control-Allow-Origin', 'marcocelani.altervista.org');
+        res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
         res.header('Access-Control-Allow-Headers', 'Content-Type');
         res.writeHead(200, { 'Content-Type' : contentType });
