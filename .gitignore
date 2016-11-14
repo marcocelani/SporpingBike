@@ -214,5 +214,5 @@ jsconfig.json
 /SporpingBike/bike/*
 /SporpingBike/nohup.out
 /SporpingBike/configuration.js
-.vscode/
-.vs/
+/.vscode/
+/.vs/
