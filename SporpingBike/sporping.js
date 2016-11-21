@@ -18,7 +18,7 @@ var http = require('http'),
     async = require('async');
 
 var config = configuration.config;
-var app = express();
+
 var upload = multer({ dest: config.BIKE_FOLDER })
 
 passport.use(new BasicStrategy(
@@ -281,34 +281,6 @@ var manage404 = function(req, res, next){
 // });
 // });
 
-/******* ROUTING *******/
-app.use(compress());
-app.use('/', express.static(config.ROOT_DOCUMENT + '/html', { lastModified : true }));
-app.use('/images', express.static(config.ROOT_DOCUMENT + '/images', { lastModified : true }));
-app.use('/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
-app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
-app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
-app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
-app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
-app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
-app.use(bodyParser.json());
-app.use(passport.initialize());
-app.get('/api/0.1/getMaxBike', getMaxBike01);
-app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
-app.get('/api/0.1/getNearestBike', getNearestBike01);
-app.get('/api/0.1/getBikes', getBikes01);
-app.get('/api/0.1/getAboutData', getAboutData01);
-app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }), getDisabled01);
-app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false }), enableBike01); 
-app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false }), deleteBike01);
-app.post('/api/0.1/add', upload.single('file'), add01);
-app.post('/api/0.1/search', search_api01);
-/* 404 */
-app.use(manage404);
-/***********************/
-
 process.on('uncaughtException', function (err) {
     console.log(err.stack);
     console.log('[ERR]:' + err.message);
@@ -337,6 +309,35 @@ process.on('SIGINT', function () {
 var server; 
 
 var init = function(){
+    var app = express();
+
+    /******* ROUTING *******/
+app.use(compress());
+app.use('/', express.static(config.ROOT_DOCUMENT + '/html', { lastModified : true }));
+app.use('/images', express.static(config.ROOT_DOCUMENT + '/images', { lastModified : true }));
+app.use('/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fagioli/js', express.static(config.ROOT_DOCUMENT + '/js', { lastModified : true }));
+app.use('/fagioli/css', express.static(config.ROOT_DOCUMENT + '/css', { lastModified : true }));
+app.use('/fagioli/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use('/fagioli/bike', express.static(config.BIKE_FOLDER, { lastModified : true }));
+app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified : true }));
+app.use(bodyParser.json());
+app.use(passport.initialize());
+app.get('/api/0.1/getMaxBike', getMaxBike01);
+app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
+app.get('/api/0.1/getNearestBike', getNearestBike01);
+app.get('/api/0.1/getBikes', getBikes01);
+app.get('/api/0.1/getAboutData', getAboutData01);
+app.get('/api/0.1/getDisabled', passport.authenticate('basic', { session : false }), getDisabled01);
+app.post('/api/0.1/enableBike', passport.authenticate('basic', { session : false }), enableBike01); 
+app.post('/api/0.1/deleteBike', passport.authenticate('basic', { session : false }), deleteBike01);
+app.post('/api/0.1/add', upload.single('file'), add01);
+app.post('/api/0.1/search', search_api01);
+/* 404 */
+app.use(manage404);
+/***********************/
     server = app.listen(config.HTTP_PORT);
     console.log('SporpingBike started (PID:' + process.pid + ').');
 };
