@@ -49,7 +49,7 @@ SporpingBike.sporpingManagement.controller('ManagementController', ['$scope', '$
 		};
 		
 		$scope.deleteBike = function(index){
-			if(!confirm('Are your shure?'))
+			if(!confirm('Are your sure?'))
 				return;
 			$http.post(HOSTNAME+'/api/0.1/deleteBike', { bike : { id : $scope.bikes[index]._id }}).then(
 				function(result){

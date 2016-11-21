@@ -5,7 +5,7 @@ var configuration = require('./configuration.js');
 
 var config = configuration.config;
 
-var FAGIOLI = config.HOSTNAME + '/fagioli/messicani.html';
+var FAGIOLI = 'http://' + config.HOSTNAME + '/fagioli/messicani.html';
 
 var transporter = nodemailer.createTransport({
 	service: 'Gmail',
