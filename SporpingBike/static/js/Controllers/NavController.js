@@ -83,9 +83,25 @@
 
 				$scope.search_item.StartDate = new Date();
 				$scope.search_item.EndDate = new Date();
+				
 				Global.changeMenu('nav_search');
-				$scope.searchedBikes = sharedContent.getSearchedBikes();
-				$scope.isOpened = ($scope.searchedBikes.length > 0) ? false : true;
+				$scope.searchedBikes = sharedContent.getSearchedBikes().items;
+				$scope.paginationParams.currentPage = sharedContent.getSearchedBikes().page;
+				
+				if(!$scope.paginationParams.currentPage)
+					$scope.paginationParams.currentPage = 1;
+				
+				$scope.paginationParams.totalItems = sharedContent.getSearchedBikes().totalItems
+				$scope.paginationParams.per_page = sharedContent.getSearchedBikes().per_page;
+				$scope.search_item.Title = sharedContent.getSearchedBikes().Title;
+				$scope.search_item.Nickname = sharedContent.getSearchedBikes().Nickname;
+
+				if(!$scope.search_item.Title)
+					$scope.search_item.Title = '';
+				if(!$scope.search_item.Nickname)
+					$scope.search_item.Nickname = '';
+
+				$scope.isOpened = (angular.isArray($scope.searchedBikes) && $scope.searchedBikes.length > 0) ? false : true;
 			};
 
 			$scope.pageChanged = function () {
@@ -114,6 +130,10 @@
 					return;
 				}
 
+				if($scope.search_item.Title != sharedContent.getSearchedBikes().Title ||
+				   $scope.search_item.Nickname != sharedContent.getSearchedBikes().Nickname)
+				   $scope.paginationParams.currentPage = 1;
+				
 				$scope.clicked = true;
 
 				if(isTxtChanged){
@@ -126,7 +146,13 @@
 				$http.post(HOSTNAME + '/api/0.1/search', JSON.stringify($scope.search_item))
 					.then(
 					function (result) {
-						//sharedContent.setSearchedBikes(result.data.data);
+						sharedContent.setSearchedBikes({ page: $scope.paginationParams.currentPage,
+														 items: result.data.data.docs,
+														 totalItems: result.data.data.totalItems,
+														 per_page: result.data.data.per_page,
+														 Title: $scope.search_item.Title,
+														 Nickname: $scope.search_item.Nickname
+														});
 						$scope.searchedBikes = result.data.data.docs;
 						$scope.paginationParams.totalItems = result.data.data.totalItems
 						$scope.paginationParams.per_page = result.data.data.per_page;
