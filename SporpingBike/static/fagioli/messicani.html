@@ -10,6 +10,8 @@
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 		<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+		<script type='text/javascript' src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 		<script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js'></script>
 		<script type='text/javascript' src='js/ui-bootstrap-tpls-0.14.3.min.js'></script>
 		<script type='text/javascript' src='js/appManagement.js?v=0.0.1'></script>
@@ -35,12 +37,17 @@
 						<p>{{slide.userName}}</p>
 						<div>
 							<button class="btn btn-primary" data-ng-click="enableBike($index)">Enable</button>
+							<button class="btn btn-default" data-ng-click="showOnMap($index)">Show On Map</button>
 							<button class="btn btn-warning" data-ng-click="deleteBike($index)">Delete</button>
 						</div>
 					</div>
 				</uib-slide>
 			</uib-carousel>
 		</div>
+		<div>
+		<h1>Sporping Location</h1>
+		<div id="map" class="rounded"></div>
+	</div>
 	</div>
 	</body>
 </html>

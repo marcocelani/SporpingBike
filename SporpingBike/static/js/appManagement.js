@@ -7,7 +7,14 @@ SporpingBike.sporpingManagement.controller('ManagementController', ['$scope', '$
 	function($scope, $q, $http){
 		$scope.bikes = [];
 		
+		var map = null;
+		var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+				osmAttribution = 'Map data &copy; 2012 <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+				osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttribution});
+
 		var init = function(){
+			map = new L.Map('map', {zoomControl: true});
+			map.setView(new L.LatLng(41.8933439, 12.4830718), 12).addLayer(osm);
 			$q.all([getInactive()]).then(
 				function(){
 				},
@@ -47,7 +54,12 @@ SporpingBike.sporpingManagement.controller('ManagementController', ['$scope', '$
 				}
 			);
 		};
-		
+
+		$scope.showOnMap = function(index){
+			L.marker($scope.bikes[index].loc.coordinates).addTo(map);
+			map.setView(new L.LatLng($scope.bikes[index].loc.coordinates[0], $scope.bikes[index].loc.coordinates[1]));
+		};
+
 		$scope.deleteBike = function(index){
 			if(!confirm('Are your sure?'))
 				return;
