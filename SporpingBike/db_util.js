@@ -494,7 +494,7 @@ var search = function (data, cb) {
             db.close();
             cb(null, []);
             return;
-        };
+        }
 
         if (data.Title &&
             typeof (data.Title) === 'string' &&
