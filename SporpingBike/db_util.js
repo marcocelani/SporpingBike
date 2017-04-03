@@ -89,7 +89,7 @@ var insertSporpingItem = function (doc, objectId, ext, cb) {
         doc.loc = { type: "Point", coordinates: [parseFloat(doc.loc.coordinates[0]), parseFloat(doc.loc.coordinates[1])] };
         if (!doc.userName)
             doc.userName = "Anonymous";
-        sporping_item.insertOne(doc, { w: 1 }, function (err, r) {
+        sporping_item.insertOne(doc, { w: 1 }, function (err) {
             if (err) {
                 console.log(err.stack);
                 next(err);
@@ -465,7 +465,7 @@ var search = function (data, cb) {
             data.Title.trim() !== '' &&
             data.Title.length > 2
         ) query.title = { $regex: new RegExp(data.Title, "i") };
-        
+
         if (data.Nickname &&
             typeof (data.Nickname) === 'string' &&
             data.Nickname.trim() !== '' &&
