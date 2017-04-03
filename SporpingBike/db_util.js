@@ -84,7 +84,6 @@ var insertSporpingItem = function (doc, objectId, ext, cb) {
         doc.fileName = doc._id + '.' + ext.ext;
         doc.creationDate = new Date();
         doc.emailConfirmed = true; /* not used but necessary set to true */
-        //doc.emailHash = crypto.createHash('sha256').update('' + doc._id).digest('hex');
         doc.enabled = false;
         doc.rejected = false;
         doc.loc = { type: "Point", coordinates: [parseFloat(doc.loc.coordinates[0]), parseFloat(doc.loc.coordinates[1])] };
@@ -211,41 +210,6 @@ var insert_into_last = function (id, whereToSearch) {
             return false;
         }
         return true;
-    });
-};
-
-/* NOT USED */
-var activateRequest = function (id, next) {
-    MongoClient.connect(db_connection_str, function (err, db) {
-        if (err) {
-            console.log(err.stack);
-            next(new Error('cannot connect:' + err.message));
-        } else {
-            db.collection(sporping_item_col, function (err, sporping_item) {
-                if (err) {
-                    console.log(err.stack);
-                    next(new Error('cannot get collection:' + err.message));
-                    db.close();
-                } else {
-                    sporping_item.updateOne({ emailHash: id, emailConfirmed: false }, { $set: { emailConfirmed: true } }, function (err, r) {
-                        if (err) {
-                            console.log(err.stack);
-                            next(new Error('cannot update document:' + err.message));
-                            db.close();
-                        } else {
-                            //result: { ok: 1, n: 0, upserted: [] },
-                            if (r.result.n == 1) {
-                                insert_into_last(id, false);
-                                next(null);
-                            } else {
-                                next(new Error('Is ID valid?'));
-                            }
-                            db.close();
-                        }
-                    });
-                }
-            });
-        }
     });
 };
 
@@ -566,7 +530,6 @@ var search = function (data, cb) {
 
 exports.insertSporpingItem = insertSporpingItem;
 exports.getDisabledBike = getDisabledBike;
-//exports.activateRequest = activateRequest;
 exports.enableBike = enableBike;
 exports.disableBike = disableBike;
 exports.getLastBikes = getLastBikes;
