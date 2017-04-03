@@ -17,6 +17,6 @@ var config = {
     GMAIL_PWD : undefined,
     PRODUCTION : true,
     PER_PAGE : 5, /* PER PAGE ITEMS */
-    BIKE_ACTIVATOR_LOCATION: undefined // /folder/file.html
+    BIKE_ACTIVATOR_LOCATION: undefined 
 };
 exports.config = config;
