@@ -17,7 +17,10 @@ var transporter = nodemailer.createTransport({
 
 var sendNotification = function(userEmail, userName, next){
 	//userEmail is not used.
-	if(!userName) userName = 'Anonymous';
+	if(!userName) {
+		userName = 'Anonymous';
+	}
+	
     var mailOptions = {
         from : 'SporpingBike <sporpingbike@gmail.com>',
         to : 'sporpingbike@gmail.com',
