@@ -54,7 +54,7 @@ var Ko = function (res , contentType, data) {
 };
 
 var fagioli = function (req, res) {
-    fs.readFile(config.ROOT_DOCUMENT + config.BIKE_ACTIVATOR_LOCATION, function (err, data) {
+    fs.readFile(config.ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
         if (err) {
             Ko(res, 'text/plain', err.message);
             return;
