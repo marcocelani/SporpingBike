@@ -35,7 +35,4 @@ var sendNotification = function(userEmail, userName, next){
 	});
 };
 
-
-
-//exports.sendMail = sendMail;
 exports.sendNotification = sendNotification;
