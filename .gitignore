@@ -206,6 +206,12 @@ FakesAssemblies/
 # Visual Studio 6 workspace options file
 *.opt
 
+*.properties
+
+#SonarQube
+/.sonar/
+.sonar_lock
+
 # LightSwitch generated files
 GeneratedArtifacts/
 _Pvt_Extensions/
