@@ -54,7 +54,7 @@ var Ko = function (res , contentType, data) {
 };
 
 var fagioli = function (req, res) {
-    fs.readFile(config.ROOT_DOCUMENT + '/fagioli/messicani.html', function (err, data) {
+    fs.readFile(config.ROOT_DOCUMENT + config.BIKE_ACTIVATOR_LOCATION, function (err, data) {
         if (err) {
             Ko(res, 'text/plain', err.message);
             return;
@@ -269,17 +269,6 @@ var manage404 = function(req, res, next){
         res.type('txt').end('404 not found');
     }
 }
-// app.get('/activate', function(req, res){
-// db_util.activateRequest(req.query.id, function(err){
-// if(err){
-// console.log(err.stack);
-// res.end('Error, I cannot activate your request:' + err.message);
-// } else {
-// console.log(req.headers.host);
-// res.end('Thank you! Your request is now confirmed.');
-// }
-// });
-// });
 
 process.on('uncaughtException', function (err) {
     console.log(err.stack);
@@ -326,7 +315,7 @@ app.use('/fonts', express.static(config.ROOT_DOCUMENT + '/fonts', { lastModified
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.get('/api/0.1/getMaxBike', getMaxBike01);
-app.get('/fagioli/messicani.html', passport.authenticate('basic', { session : false }), fagioli);
+app.get(config.BIKE_ACTIVATOR_LOCATION, passport.authenticate('basic', { session : false }), fagioli);
 app.get('/api/0.1/getNearestBike', getNearestBike01);
 app.get('/api/0.1/getBikes', getBikes01);
 app.get('/api/0.1/getAboutData', getAboutData01);
