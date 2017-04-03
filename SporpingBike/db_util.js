@@ -193,7 +193,7 @@ var insert_into_last = function (id, whereToSearch) {
                 item.title = documents[0].title;
             }
             sporping_last.insertOne(item, { w: 1 },
-                function (err, r) {
+                function (err) {
                     if (err) {
                         console.log(err.stack);
                         console.log('Error, cannot insert:' + err.message);
